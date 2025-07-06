@@ -1,23 +1,12 @@
-# agents/tester.py
-"""
-Запускает Unity EditMode-тесты, парсит JUnit-XML и возвращает статистику.
-Использует пути из config.py, чтобы не хардкодить их внутри файла.
-"""
-
 from __future__ import annotations
-
-import json
 import subprocess
 import tempfile
-import textwrap
 import xml.etree.ElementTree as ET
+import textwrap
+import json
 from pathlib import Path
-
-import config  # ← единый источник путей / настроек
+import config
 from . import team_lead
-
-# ---------- helpers -------------------------------------------------
-
 
 def _ensure_playmode_test(script_path: str | None) -> None:
     """Create a simple PlayMode test template if none exists."""
@@ -40,9 +29,7 @@ def _ensure_playmode_test(script_path: str | None) -> None:
     )
     test_file.write_text(content, encoding="utf-8")
 
-
 def _run_unity(project_path: str, unity_cli: str, xml_path: str, platform: str) -> subprocess.CompletedProcess:
-    """Запустить Unity CLI с параметрами тестов."""
     cmd = [
         unity_cli,
         "-batchmode", "-nographics",
@@ -53,12 +40,9 @@ def _run_unity(project_path: str, unity_cli: str, xml_path: str, platform: str) 
     ]
     return subprocess.run(cmd, capture_output=True, text=True)
 
-
 def _parse_results(xml_file: Path):
-    """Подсчитать Passed / Failed из JUnit-XML."""
     if not xml_file.exists():
         return 0, 0, "results.xml not generated"
-
     tree = ET.parse(xml_file)
     root = tree.getroot()
     passed = failed = 0
@@ -69,22 +53,11 @@ def _parse_results(xml_file: Path):
             failed += 1
     return passed, failed, ""
 
-
-# ---------- public API ----------------------------------------------
-
-
 def tester(task_spec) -> dict:
-    """
-    Args:
-        task_spec: dict со списком задач (пока не используется).
-    Returns:
-        dict {passed, failed, logs, report_path}
-    """
     unity_cli = config.UNITY_CLI
     project_path = config.PROJECT_PATH
     _ensure_playmode_test(task_spec.get("path"))
     tmp_dir = tempfile.TemporaryDirectory()
-
     xml_edit = Path(tmp_dir.name) / "edit_results.xml"
     xml_play = Path(tmp_dir.name) / "play_results.xml"
 
@@ -118,7 +91,5 @@ def tester(task_spec) -> dict:
         "report_paths": [str(xml_edit), str(xml_play)],
     }
 
-
-# локальный быстрый тест (запускать при необходимости)
 if __name__ == "__main__":
     print(json.dumps(tester({}), indent=2, ensure_ascii=False))

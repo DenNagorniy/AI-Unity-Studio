@@ -1,11 +1,8 @@
 from __future__ import annotations
-
 import shutil
 import subprocess
 from pathlib import Path
-
 import config
-
 
 def run(input: dict) -> dict:
     """Build the project for a given target using Unity CLI."""

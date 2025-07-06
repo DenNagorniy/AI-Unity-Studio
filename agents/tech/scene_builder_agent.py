@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 import json
 from pathlib import Path
-
 
 def run(input: dict) -> dict:
     """Generate a simple scene description tied to the generated script."""
