@@ -3,7 +3,6 @@ from pathlib import Path
 import json
 import config
 
-
 def run(input: dict) -> dict:
     """Determine script path/namespace and ensure asmdef exists."""
     feature = (
@@ -11,6 +10,7 @@ def run(input: dict) -> dict:
         or input.get("task")
         or (input.get("tasks") or [{}])[0].get("feature")
     )
+
     if isinstance(feature, dict):
         feature = feature.get("feature")
 
@@ -19,7 +19,6 @@ def run(input: dict) -> dict:
     base_dir = Path(config.UNITY_SCRIPTS_PATH) / "Generated"
     base_dir.mkdir(parents=True, exist_ok=True)
 
-    # Relative path from UNITY_SCRIPTS_PATH
     path = f"Generated/{name}.cs"
     asmdef_file = base_dir / "AIUnityStudio.Generated.asmdef"
     if not asmdef_file.exists():

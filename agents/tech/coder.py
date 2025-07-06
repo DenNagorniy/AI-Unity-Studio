@@ -1,7 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
 
-
 def coder(task_spec):
     """Generate a simple C# helper file patch."""
     path = task_spec.get("path", "Generated/Helper.cs")
@@ -25,7 +24,6 @@ def coder(task_spec):
             }
         ]
     }
-
 
 def run(task_spec):
     """Public wrapper used by the orchestrator."""
