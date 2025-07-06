@@ -2,6 +2,7 @@ from pathlib import Path
 from utils import git_tools
 from config import UNITY_SCRIPTS_PATH
 
+
 def save_to_unity_structure(modification):
     filename = modification["path"]
     content = modification["content"]
@@ -11,6 +12,7 @@ def save_to_unity_structure(modification):
 
     target_path.write_text(content, encoding="utf-8")
     print(f"✅ Файл сохранён в Unity проект: {target_path}")
+
 
 def apply_patch(patch):
     for mod in patch.get("modifications", []):

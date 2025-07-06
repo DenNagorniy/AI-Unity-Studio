@@ -12,8 +12,13 @@
 ## Быстрый старт (спринт-0)
 
 ```bash
-# Установить зависимости (пока requirements.txt может быть пустым)
+# Установить зависимости
 pip install -r requirements.txt
 
-# Запустить «холостой» пайплайн — проверим, что каркас работает
-python orchestrator.py "Hello world feature"
+# Скопировать .env.example и указать пути к Unity проекту и CLI
+cp .env.example .env && edit .env
+
+# Запустить оркестратор
+python -m agents.tech.orchestrator "Hello world feature"
+
+Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → TeamLead → Refactor.
