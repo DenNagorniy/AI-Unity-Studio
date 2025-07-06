@@ -15,6 +15,7 @@ from utils import apply_patch
 from utils.dotnet_tools import run_dotnet_build
 import config
 
+
 def main(text: str):
     team_lead.log("🚀 Start AI pipeline")
 
@@ -57,6 +58,7 @@ def main(text: str):
     team_lead.merge_feature(feature.get("feature", "unknown"), metrics)
 
     team_lead.log("🎉 Pipeline completed")
+
 
 if __name__ == "__main__":
     text = sys.argv[1] if len(sys.argv) > 1 else "Hello world feature"

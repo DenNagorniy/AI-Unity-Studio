@@ -2,6 +2,7 @@ from __future__ import annotations
 import subprocess
 import config
 
+
 def run(input: dict) -> dict:
     """Run Roslyn analyzers and check for dead code."""
 
@@ -14,10 +15,7 @@ def run(input: dict) -> dict:
     ]
     proc = subprocess.run(analyze_cmd, capture_output=True, text=True)
 
-    dead_code = [
-        line.strip() for line in proc.stdout.splitlines()
-        if "warning" in line and "is never used" in line
-    ]
+    dead_code = [line.strip() for line in proc.stdout.splitlines() if "warning" in line and "is never used" in line]
 
     format_cmd = [
         "dotnet",

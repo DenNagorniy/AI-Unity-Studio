@@ -1,6 +1,7 @@
 import subprocess
 import time
 
+
 def run_dotnet_build(project_path: str) -> dict:
     """Run dotnet build and return timing and output."""
     print(f"🛠 Запуск dotnet build для {project_path}")

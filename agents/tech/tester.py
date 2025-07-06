@@ -8,6 +8,7 @@ from pathlib import Path
 import config
 from . import team_lead
 
+
 def _ensure_playmode_test(script_path: str | None) -> None:
     """Create a simple PlayMode test template if none exists."""
     if not script_path:
@@ -29,6 +30,7 @@ def _ensure_playmode_test(script_path: str | None) -> None:
     )
     test_file.write_text(content, encoding="utf-8")
 
+
 def _run_unity(project_path: str, unity_cli: str, xml_path: str, platform: str) -> subprocess.CompletedProcess:
     cmd = [
         unity_cli,
@@ -45,6 +47,7 @@ def _run_unity(project_path: str, unity_cli: str, xml_path: str, platform: str) 
     ]
     return subprocess.run(cmd, capture_output=True, text=True)
 
+
 def _parse_results(xml_file: Path):
     if not xml_file.exists():
         return 0, 0, "results.xml not generated"
@@ -57,6 +60,7 @@ def _parse_results(xml_file: Path):
         else:
             failed += 1
     return passed, failed, ""
+
 
 def tester(task_spec) -> dict:
     unity_cli = config.UNITY_CLI
@@ -95,6 +99,7 @@ def tester(task_spec) -> dict:
         "logs": logs,
         "report_paths": [str(xml_edit), str(xml_play)],
     }
+
 
 if __name__ == "__main__":
     print(json.dumps(tester({}), indent=2, ensure_ascii=False))

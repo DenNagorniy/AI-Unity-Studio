@@ -13,17 +13,10 @@ repos:
       - id: flake8
         args: ["--max-line-length=120"]
 
-repos:
   - repo: local
     hooks:
-      - id: dotnet-format
-        name: dotnet formatter
-        entry: dotnet format
-        language: system
-        files: '\.cs$'
-
       - id: mapctl-validate
         name: mapctl validate
         entry: python tools/mapctl.py validate
         language: system
-        files: ^tools/mapctl.py
+        pass_filenames: false  # Не передавать файлы как аргументы!

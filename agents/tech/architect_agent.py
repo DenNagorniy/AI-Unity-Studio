@@ -3,13 +3,10 @@ from pathlib import Path
 import json
 import config
 
+
 def run(input: dict) -> dict:
     """Determine script path/namespace and ensure asmdef exists."""
-    feature = (
-        input.get("feature")
-        or input.get("task")
-        or (input.get("tasks") or [{}])[0].get("feature")
-    )
+    feature = input.get("feature") or input.get("task") or (input.get("tasks") or [{}])[0].get("feature")
 
     if isinstance(feature, dict):
         feature = feature.get("feature")
