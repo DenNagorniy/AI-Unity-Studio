@@ -40,7 +40,7 @@ def main(text: str):
     team_lead.log(f"🎨 Scene result: {json.dumps(scene_result, ensure_ascii=False)}")
 
     # 5️⃣ Генерация кода
-    patch = coder.run(tasks)
+    patch = coder.run(arch)
     team_lead.log(f"👨‍💻 Patch generated: {json.dumps(patch, ensure_ascii=False)[:120]}...")
 
     # 6️⃣ Применение патча
