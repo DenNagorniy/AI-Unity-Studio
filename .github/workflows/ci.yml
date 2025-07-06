@@ -10,10 +10,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    env:
-      # Задай PROJECT_PATH напрямую в env или через secret, если хочешь
-      PROJECT_PATH: project/Assembly-CSharp.csproj
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -33,6 +29,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Load env variables
+      run: |
+        set -o allexport
+        source .env.example
+        set +o allexport
+      shell: bash
+
     - name: Lint Python code
       run: |
         pip install flake8
@@ -45,27 +48,26 @@ jobs:
     - name: dotnet build
       run: |
         if [ -z "$PROJECT_PATH" ]; then
-          echo "❌ PROJECT_PATH is not set."
+          echo "❌ PROJECT_PATH is not set. Please check .env.example"
           exit 1
         fi
         echo "🚀 Building project at $PROJECT_PATH"
-        dotnet build "$PROJECT_PATH" > build.log 2>&1
+        dotnet build "$PROJECT_PATH"
 
     - name: Validate project_map.json
       run: python tools/mapctl.py validate
 
     - name: dotnet tests with coverage
       run: |
-        echo "🚀 Running dotnet tests at $PROJECT_PATH"
         dotnet test "$PROJECT_PATH" --collect "XPlat Code Coverage"
 
     - name: Unity tests
       run: |
         if [ -z "$UNITY_CLI" ]; then
-          echo "❌ UNITY_CLI is not set."
-          exit 1
+          echo "⚠ UNITY_CLI is not set, skipping Unity tests"
+        else
+          $UNITY_CLI -batchmode -runTests -projectPath . -testResults results.xml
         fi
-        $UNITY_CLI -batchmode -runTests -projectPath . -testResults results.xml
 
     - uses: actions/upload-artifact@v4
       with:
