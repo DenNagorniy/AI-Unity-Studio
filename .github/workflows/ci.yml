@@ -25,3 +25,9 @@ jobs:
       - name: Validate project_map.json
         run: |
           python tools/mapctl.py validate
+
+      - name: dotnet build
+        run: dotnet build ${{ secrets.PROJECT_PATH }}
+
+      - name: Unity tests
+        run: ${{ secrets.UNITY_CLI }} -batchmode -runTests -projectPath . -testResults results.xml

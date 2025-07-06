@@ -1,51 +1,34 @@
-import os
-import subprocess
-import tempfile
+from __future__ import annotations
+from pathlib import Path
 import json
+import config
 
 def coder(task_spec):
+    """Generate a simple C# helper file patch."""
+    path = task_spec.get("path", "Generated/Helper.cs")
+    namespace = task_spec.get("namespace", "AIUnityStudio.Generated")
+
+    class_name = Path(path).stem
     code = (
-        "public static class MathHelper\n"
-        "{\n"
-        "    public static int Square(int x)\n"
-        "    {\n"
-        "        return x * x;\n"
-        "    }\n"
-        "}"
+        f"namespace {namespace} {{\n"
+        f"    public static class {class_name} {{\n"
+        f"        public static int Square(int x) => x * x;\n"
+        f"    }}\n"
+        f"}}\n"
     )
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        csproj_path = os.path.join(temp_dir, f"{os.path.basename(temp_dir)}.csproj")
-        code_path = os.path.join(temp_dir, "MathHelper.cs")
-
-        # Создаём проект
-        subprocess.run(["dotnet", "new", "classlib", "--output", temp_dir], check=True)
-
-        # Сохраняем код
-        with open(code_path, "w", encoding="utf-8") as f:
-            f.write(code)
-
-        # Компилируем проект
-        result = subprocess.run(
-            ["dotnet", "build", csproj_path],
-            capture_output=True,
-            text=True
-        )
-
-        if result.returncode != 0:
-            print(result.stdout)
-            print(result.stderr)
-            raise ValueError("dotnet build failed")
-
-        print("🎉 Компиляция успешна!")
-
-    # Возвращаем модификацию с правильным action
     return {
         "modifications": [
             {
-                "path": "MathHelper.cs",
+                "path": path,
                 "content": code,
-                "action": "overwrite"
+                "action": "overwrite",
             }
         ]
     }
+
+
+def run(task_spec):
+    """Public wrapper used by the orchestrator."""
+    return coder(task_spec)
+
