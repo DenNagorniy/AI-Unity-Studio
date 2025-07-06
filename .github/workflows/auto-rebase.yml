@@ -1,0 +1,33 @@
+name: Auto Rebase PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  auto-rebase:
+    runs-on: ubuntu-latest
+
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+    - name: Checkout PR branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set git config
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "actions@github.com"
+
+    - name: Fetch main
+      run: git fetch origin main
+
+    - name: Rebase onto main
+      run: |
+        git rebase origin/main || (echo "❌ Rebase failed, resolve conflicts manually." && exit 1)
+
+    - name: Force-push rebased branch
+      run: git push --force-with-lease
