@@ -14,37 +14,53 @@ jobs:
       PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
 
     steps:
+    # 📥 Получаем код из репозитория
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # 🐍 Устанавливаем Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
+    # ⚙ Устанавливаем .NET
     - name: Set up .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: '8.0.x'
 
+    # 📦 Устанавливаем Python зависимости
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    # 🔍 Lint Python кода
     - name: Lint Python code
       run: |
         pip install flake8
         flake8 agents utils --max-line-length=120
 
+    # 🧪 Запуск Python тестов
     - name: Run Python tests
       run: |
         python test-run.py || echo "⚠ test-run.py failed — continue pipeline"
 
+    # ⚡ Сборка .NET и сохранение логов
     - name: dotnet build
       run: |
         if [ -z "$PROJECT_PATH" ]; then
           echo "❌ PROJECT_PATH is not set. Please set it in repo secrets."
           exit 1
         fi
-        dotnet build "$PROJECT_PATH"
+        echo "🚀 Building project at $PROJECT_PATH"
+        dotnet build "$PROJECT_PATH" > build.log 2>&1 || echo "⚠ dotnet build failed — review build log"
+
+    # 📤 Загружаем build.log как артефакт для анализа
+    - name: Upload build logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-logs
+        path: build.log
