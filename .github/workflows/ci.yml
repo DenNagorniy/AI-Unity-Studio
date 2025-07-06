@@ -28,13 +28,13 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install python-dotenv
 
-    - name: Load env variables
+    - name: Load env variables from .env.example
+      id: load-env
       run: |
-        set -o allexport
-        source .env.example
-        set +o allexport
-      shell: bash
+        echo "PROJECT_PATH=$(grep PROJECT_PATH .env.example | cut -d '=' -f2-)" >> $GITHUB_ENV
+        echo "UNITY_CLI=$(grep UNITY_CLI .env.example | cut -d '=' -f2-)" >> $GITHUB_ENV
 
     - name: Lint Python code
       run: |
