@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # читаем .env (лежит в корне проекта)
 load_dotenv()
 
-PROJECT_PATH = r"D:/Start/unity-ai-lab"                # абсолютный путь
+PROJECT_PATH = r"D:/Start/AI-Unity-Studio-00-Project/My project"                # абсолютный путь
 UNITY_CLI    = r"C:/Program Files/Unity/Hub/Editor/6000.0.40f1/Editor/Unity.exe"
 OPENAI_API_KEY = "ollama"   
 
