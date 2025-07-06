@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pathlib import Path
-import json
 import config
 
 def coder(task_spec):
@@ -27,8 +26,6 @@ def coder(task_spec):
         ]
     }
 
-
 def run(task_spec):
     """Public wrapper used by the orchestrator."""
     return coder(task_spec)
-
