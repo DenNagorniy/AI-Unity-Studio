@@ -58,9 +58,8 @@ jobs:
         dotnet build "$PROJECT_PATH" > build.log 2>&1 || echo "⚠ dotnet build failed — review build log"
 
     # 📤 Загружаем build.log как артефакт для анализа
-    - name: Upload build logs
-      if: always()
-      uses: actions/upload-artifact@v3
+    - name: Upload build log
+      uses: actions/upload-artifact@v4
       with:
-        name: build-logs
+        name: build-log
         path: build.log
