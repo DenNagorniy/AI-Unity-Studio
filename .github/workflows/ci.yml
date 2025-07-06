@@ -25,3 +25,22 @@ jobs:
       - name: Validate project_map.json
         run: |
           python tools/mapctl.py validate
+
+      - name: dotnet build
+        run: dotnet build ${{ secrets.PROJECT_PATH }}
+
+      - name: dotnet tests with coverage
+        run: dotnet test ${{ secrets.PROJECT_PATH }} --collect "XPlat Code Coverage"
+
+      - name: Unity tests
+        run: ${{ secrets.UNITY_CLI }} -batchmode -runTests -projectPath . -testResults results.xml
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unity-test-results
+          path: results.xml
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: '**/coverage.cobertura.xml'

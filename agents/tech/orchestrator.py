@@ -8,11 +8,12 @@ import json
 from agents.tech import (
     game_designer,
     project_manager,
-    architect,
+    architect_agent,
     coder,
-    scene_builder,
+    scene_builder_agent,
+    build_agent,
     tester,
-    refactor,
+    refactor_agent,
     team_lead,
 )
 from utils import apply_patch
@@ -32,15 +33,15 @@ def main(text: str):
     team_lead.log(f"📋 Tasks: {json.dumps(tasks, ensure_ascii=False)}")
 
     # 3️⃣ Архитектура
-    arch = architect.run(tasks)
+    arch = architect_agent.run(tasks)
     team_lead.log(f"🧱 Architecture: {json.dumps(arch, ensure_ascii=False)}")
 
     # 4️⃣ Построение сцены / префабов (опционально)
-    scene_result = scene_builder.run(arch)
+    scene_result = scene_builder_agent.run(arch)
     team_lead.log(f"🎨 Scene result: {json.dumps(scene_result, ensure_ascii=False)}")
 
     # 5️⃣ Генерация кода
-    patch = coder.run(tasks)
+    patch = coder.run(arch)
     team_lead.log(f"👨‍💻 Patch generated: {json.dumps(patch, ensure_ascii=False)[:120]}...")
 
     # 6️⃣ Применение патча
@@ -48,16 +49,27 @@ def main(text: str):
     team_lead.log("✅ Patch applied & committed")
 
     # 7️⃣ Сборка проекта
-    run_dotnet_build(config.PROJECT_PATH)
+    build_stats = run_dotnet_build(config.PROJECT_PATH)
     team_lead.log("🛠 dotnet build completed")
 
     # 8️⃣ Unity тесты
     test_res = tester.run(tasks)
     team_lead.log(f"🧪 Tests: {test_res.get('passed', 0)}✓ / {test_res.get('failed', 0)}✗")
 
-    # 9️⃣ Статический анализ
-    refactor.run({})
+    # 9️⃣ Build artifacts
+    build_info = build_agent.run({"target": "WebGL"})
+    team_lead.log(f"📦 Build: {json.dumps(build_info, ensure_ascii=False)[:120]}...")
+    # 🔟 Статический анализ
+    ref_info = refactor_agent.run({})
     team_lead.log("🧼 Refactor check completed")
+
+    metrics = {
+        "tokens_used": 0,
+        "compile_seconds": build_stats.get("seconds", 0),
+        "tests_passed": test_res.get("passed", 0),
+        "dead_warnings": len(ref_info.get("dead_code", [])),
+    }
+    team_lead.merge_feature(feature.get("feature", "unknown"), metrics)
 
     team_lead.log("🎉 Pipeline completed")
 

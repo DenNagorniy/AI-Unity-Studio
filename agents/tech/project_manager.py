@@ -1,7 +1,6 @@
 # agents/tech/project_manager.py
-"""
-Stub-ProjectManager: превращает описание фичи в список одной задачи.
-"""
+"""Stub project manager that converts feature to a single task list."""
+
 
 def run(feature: dict) -> dict:
     """

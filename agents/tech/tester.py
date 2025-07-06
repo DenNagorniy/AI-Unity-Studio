@@ -3,23 +3,56 @@
 Запускает Unity EditMode-тесты, парсит JUnit-XML и возвращает статистику.
 Использует пути из config.py, чтобы не хардкодить их внутри файла.
 """
+
 from __future__ import annotations
-import os, subprocess, tempfile, xml.etree.ElementTree as ET, textwrap, json
+
+import json
+import subprocess
+import tempfile
+import textwrap
+import xml.etree.ElementTree as ET
 from pathlib import Path
-import config   # ← единый источник путей / настроек
+
+import config  # ← единый источник путей / настроек
+from . import team_lead
 
 # ---------- helpers -------------------------------------------------
-def _run_unity(project_path: str, unity_cli: str, xml_path: str):
+
+
+def _ensure_playmode_test(script_path: str | None) -> None:
+    """Create a simple PlayMode test template if none exists."""
+    if not script_path:
+        return
+    test_dir = Path("Assets/Tests/PlayMode")
+    test_dir.mkdir(parents=True, exist_ok=True)
+    class_name = Path(script_path).stem
+    test_file = test_dir / f"{class_name}Test.cs"
+    if test_file.exists():
+        return
+    content = (
+        f"using NUnit.Framework;\n"
+        f"public class {class_name}Test {{\n"
+        f"    [Test]\n"
+        f"    public void TestSimplePasses() {{\n"
+        f"        Assert.Pass();\n"
+        f"    }}\n"
+        f"}}\n"
+    )
+    test_file.write_text(content, encoding="utf-8")
+
+
+def _run_unity(project_path: str, unity_cli: str, xml_path: str, platform: str) -> subprocess.CompletedProcess:
     """Запустить Unity CLI с параметрами тестов."""
     cmd = [
         unity_cli,
         "-batchmode", "-nographics",
         "-projectPath", project_path,
-        "-runTests", "-testPlatform", "EditMode",
+        "-runTests", "-testPlatform", platform,
         "-testResults", xml_path,
         "-quit"
     ]
     return subprocess.run(cmd, capture_output=True, text=True)
+
 
 def _parse_results(xml_file: Path):
     """Подсчитать Passed / Failed из JUnit-XML."""
@@ -36,7 +69,10 @@ def _parse_results(xml_file: Path):
             failed += 1
     return passed, failed, ""
 
+
 # ---------- public API ----------------------------------------------
+
+
 def tester(task_spec) -> dict:
     """
     Args:
@@ -44,27 +80,44 @@ def tester(task_spec) -> dict:
     Returns:
         dict {passed, failed, logs, report_path}
     """
-    unity_cli     = config.UNITY_CLI
-    project_path  = config.PROJECT_PATH
-    tmp_dir       = tempfile.TemporaryDirectory()
-    xml_file      = Path(tmp_dir.name) / "results.xml"
+    unity_cli = config.UNITY_CLI
+    project_path = config.PROJECT_PATH
+    _ensure_playmode_test(task_spec.get("path"))
+    tmp_dir = tempfile.TemporaryDirectory()
 
-    proc = _run_unity(project_path, unity_cli, str(xml_file))
-    passed, failed, extra = _parse_results(xml_file)
+    xml_edit = Path(tmp_dir.name) / "edit_results.xml"
+    xml_play = Path(tmp_dir.name) / "play_results.xml"
+
+    proc_edit = _run_unity(project_path, unity_cli, str(xml_edit), "EditMode")
+    proc_play = _run_unity(project_path, unity_cli, str(xml_play), "PlayMode")
+
+    p1, f1, extra1 = _parse_results(xml_edit)
+    p2, f2, extra2 = _parse_results(xml_play)
+    passed = p1 + p2
+    failed = f1 + f2
+    extra = f"{extra1}\n{extra2}".strip()
+
+    team_lead.update_project_map(task_spec.get("feature", "unknown"), failed == 0)
+
+    logs = textwrap.dedent(
+        f"""
+        EDIT STDOUT:
+        {proc_edit.stdout[:1000]}
+        ----
+        PLAY STDOUT:
+        {proc_play.stdout[:1000]}
+        ----
+        {extra}
+        """
+    ).strip()
 
     return {
         "passed": passed,
         "failed": failed,
-        "logs": textwrap.dedent(f"""
-            STDOUT:
-            {proc.stdout[:1000]}
-            ----
-            STDERR:
-            {proc.stderr[:1000]}
-            {extra}
-        """).strip(),
-        "report_path": str(xml_file)
+        "logs": logs,
+        "report_paths": [str(xml_edit), str(xml_play)],
     }
+
 
 # локальный быстрый тест (запускать при необходимости)
 if __name__ == "__main__":

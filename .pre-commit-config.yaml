@@ -1,0 +1,21 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.12.0
+    hooks:
+      - id: isort
+  - repo: local
+    hooks:
+      - id: dotnet-format
+        name: dotnet format
+        entry: dotnet format
+        language: system
+        types: [csproj, cs]
+      - id: check-meta-pairs
+        name: check meta pairs
+        entry: python tools/check_meta_pairs.py
+        language: system
+        types: [cs, meta, scene, prefab]
