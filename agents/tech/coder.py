@@ -49,3 +49,8 @@ def coder(task_spec):
             }
         ]
     }
+
+
+def run(task_spec):
+    """Public wrapper used by the orchestrator."""
+    return coder(task_spec)
