@@ -9,11 +9,4 @@ def run(feature: dict) -> dict:
     Returns:
         {"tasks": [ { "feature": <текст>, "acceptance": ["Compiles"] } ]}
     """
-    return {
-        "tasks": [
-            {
-                "feature": feature["feature"],
-                "acceptance": ["Compiles"]
-            }
-        ]
-    }
+    return {"tasks": [{"feature": feature["feature"], "acceptance": ["Compiles"]}]}

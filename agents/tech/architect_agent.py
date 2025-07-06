@@ -10,6 +10,7 @@ def run(input: dict) -> dict:
         or input.get("task")
         or (input.get("tasks") or [{}])[0].get("feature")
     )
+
     if isinstance(feature, dict):
         feature = feature.get("feature")
 

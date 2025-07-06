@@ -32,11 +32,16 @@ def _ensure_playmode_test(script_path: str | None) -> None:
 def _run_unity(project_path: str, unity_cli: str, xml_path: str, platform: str) -> subprocess.CompletedProcess:
     cmd = [
         unity_cli,
-        "-batchmode", "-nographics",
-        "-projectPath", project_path,
-        "-runTests", "-testPlatform", platform,
-        "-testResults", xml_path,
-        "-quit"
+        "-batchmode",
+        "-nographics",
+        "-projectPath",
+        project_path,
+        "-runTests",
+        "-testPlatform",
+        platform,
+        "-testResults",
+        xml_path,
+        "-quit",
     ]
     return subprocess.run(cmd, capture_output=True, text=True)
 

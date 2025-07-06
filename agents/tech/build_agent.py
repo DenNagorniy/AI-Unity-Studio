@@ -6,7 +6,6 @@ import config
 
 def run(input: dict) -> dict:
     """Build the project for a given target using Unity CLI."""
-
     target = input.get("target", "WebGL")
     out_dir = Path("Build") / target
     cmd = [
