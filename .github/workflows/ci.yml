@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
+      # Задай PROJECT_PATH напрямую в env или через secret, если хочешь
+      PROJECT_PATH: project/Assembly-CSharp.csproj
 
     steps:
     - name: Checkout code
@@ -44,20 +45,27 @@ jobs:
     - name: dotnet build
       run: |
         if [ -z "$PROJECT_PATH" ]; then
-          echo "❌ PROJECT_PATH is not set. Please set it in repo secrets."
+          echo "❌ PROJECT_PATH is not set."
           exit 1
         fi
         echo "🚀 Building project at $PROJECT_PATH"
-        dotnet build "$PROJECT_PATH" > build.log 2>&1 || echo "⚠ dotnet build failed — review build log"
+        dotnet build "$PROJECT_PATH" > build.log 2>&1
 
     - name: Validate project_map.json
       run: python tools/mapctl.py validate
 
     - name: dotnet tests with coverage
-      run: dotnet test ${{ secrets.PROJECT_PATH }} --collect "XPlat Code Coverage"
+      run: |
+        echo "🚀 Running dotnet tests at $PROJECT_PATH"
+        dotnet test "$PROJECT_PATH" --collect "XPlat Code Coverage"
 
     - name: Unity tests
-      run: ${{ secrets.UNITY_CLI }} -batchmode -runTests -projectPath . -testResults results.xml
+      run: |
+        if [ -z "$UNITY_CLI" ]; then
+          echo "❌ UNITY_CLI is not set."
+          exit 1
+        fi
+        $UNITY_CLI -batchmode -runTests -projectPath . -testResults results.xml
 
     - uses: actions/upload-artifact@v4
       with:
