@@ -12,6 +12,8 @@ from agents.tech import (
     team_lead,
 )
 
+from utils import apply_patch
+
 def main(text: str):
     team_lead.log("Start pipeline")
 
@@ -23,6 +25,9 @@ def main(text: str):
 
     patch = coder.coder(tasks["tasks"][0])        # DeepSeek-генерация
     team_lead.log(f"Patch generated: {json.dumps(patch)[:80]}...")
+
+    apply_patch.apply_patch(patch)
+    team_lead.log("Patch applied & committed")
 
     test_res = tester.tester(tasks)               # теперь берёт пути из config.py
     team_lead.log(f"Tests result → {test_res['passed']}✓ / {test_res['failed']}✗")
