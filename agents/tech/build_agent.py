@@ -1,5 +1,3 @@
-
-
 def run(input: dict) -> dict:
     """Stub build agent."""
 

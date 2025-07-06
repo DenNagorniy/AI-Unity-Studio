@@ -20,11 +20,16 @@ def _run_unity(project_path: str, unity_cli: str, xml_path: str):
     """Запустить Unity CLI с параметрами тестов."""
     cmd = [
         unity_cli,
-        "-batchmode", "-nographics",
-        "-projectPath", project_path,
-        "-runTests", "-testPlatform", "EditMode",
-        "-testResults", xml_path,
-        "-quit"
+        "-batchmode",
+        "-nographics",
+        "-projectPath",
+        project_path,
+        "-runTests",
+        "-testPlatform",
+        "EditMode",
+        "-testResults",
+        xml_path,
+        "-quit",
     ]
     return subprocess.run(cmd, capture_output=True, text=True)
 
@@ -66,15 +71,17 @@ def tester(task_spec) -> dict:
     return {
         "passed": passed,
         "failed": failed,
-        "logs": textwrap.dedent(f"""
+        "logs": textwrap.dedent(
+            f"""
             STDOUT:
             {proc.stdout[:1000]}
             ----
             STDERR:
             {proc.stderr[:1000]}
             {extra}
-        """).strip(),
-        "report_path": str(xml_file)
+        """
+        ).strip(),
+        "report_path": str(xml_file),
     }
 
 
