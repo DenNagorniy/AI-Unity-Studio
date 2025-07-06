@@ -50,8 +50,26 @@ jobs:
         echo "🚀 Building project at $PROJECT_PATH"
         dotnet build "$PROJECT_PATH" > build.log 2>&1 || echo "⚠ dotnet build failed — review build log"
 
-    - name: Upload build log
-      uses: actions/upload-artifact@v4
+    - name: Validate project_map.json
+      run: python tools/mapctl.py validate
+
+    - name: dotnet tests with coverage
+      run: dotnet test ${{ secrets.PROJECT_PATH }} --collect "XPlat Code Coverage"
+
+    - name: Unity tests
+      run: ${{ secrets.UNITY_CLI }} -batchmode -runTests -projectPath . -testResults results.xml
+
+    - uses: actions/upload-artifact@v4
       with:
         name: build-log
         path: build.log
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: unity-test-results
+        path: results.xml
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: coverage
+        path: '**/coverage.cobertura.xml'

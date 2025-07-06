@@ -40,5 +40,25 @@ def validate():
         click.echo(err)
         sys.exit(1)
 
+
+@cli.command()
+def summary():
+    """Краткая сводка по фичам."""
+    if not PM_PATH.exists():
+        click.echo("project_map.json not found")
+        return
+
+    data = json.loads(PM_PATH.read_text(encoding="utf-8"))
+    feats = data.get("features", {})
+    tested_count = sum(1 for f in feats.values() if f.get("tested"))
+    for name, feat in feats.items():
+        tested = "✅" if feat.get("tested") else "❌"
+        files = len(feat.get("files", []))
+        click.echo(f"{name}: {tested} files={files}")
+    total = len(feats)
+    if total:
+        coverage = tested_count / total * 100
+        click.echo(f"\nCoverage: {coverage:.1f}% ({tested_count}/{total})")
+
 if __name__ == "__main__":
     cli()
