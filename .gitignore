@@ -1,0 +1,18 @@
+# --- Python artefacts ---
+__pycache__/
+*.py[cod]
+
+# Virtual envs
+.env/
+.venv/
+env/
+venv/
+
+# IDE metadata
+.vscode/
+.idea/
+
+# Secrets
+.env
+*.env
+openai*.txt
