@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pathlib import Path
-import config
 
 def coder(task_spec):
     """Generate a simple C# helper file patch."""

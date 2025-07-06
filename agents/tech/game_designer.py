@@ -1,7 +1,6 @@
 # agents/tech/game_designer.py
-"""
-Stub-агент: получает текстовый запрос и формирует минимальное описание фичи.
-"""
+"""Stub agent to convert text prompt into feature description."""
+
 
 def run(input: dict) -> dict:
     """

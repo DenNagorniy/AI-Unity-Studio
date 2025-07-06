@@ -3,12 +3,19 @@
 Запускает Unity EditMode-тесты, парсит JUnit-XML и возвращает статистику.
 Использует пути из config.py, чтобы не хардкодить их внутри файла.
 """
+
 from __future__ import annotations
-import os, subprocess, tempfile, xml.etree.ElementTree as ET, textwrap, json
+import subprocess
+import tempfile
+import xml.etree.ElementTree as ET
+import textwrap
+import json
 from pathlib import Path
-import config   # ← единый источник путей / настроек
+import config  # ← единый источник путей / настроек
 
 # ---------- helpers -------------------------------------------------
+
+
 def _run_unity(project_path: str, unity_cli: str, xml_path: str):
     """Запустить Unity CLI с параметрами тестов."""
     cmd = [
@@ -20,6 +27,7 @@ def _run_unity(project_path: str, unity_cli: str, xml_path: str):
         "-quit"
     ]
     return subprocess.run(cmd, capture_output=True, text=True)
+
 
 def _parse_results(xml_file: Path):
     """Подсчитать Passed / Failed из JUnit-XML."""
@@ -36,7 +44,10 @@ def _parse_results(xml_file: Path):
             failed += 1
     return passed, failed, ""
 
+
 # ---------- public API ----------------------------------------------
+
+
 def tester(task_spec) -> dict:
     """
     Args:
@@ -44,10 +55,10 @@ def tester(task_spec) -> dict:
     Returns:
         dict {passed, failed, logs, report_path}
     """
-    unity_cli     = config.UNITY_CLI
-    project_path  = config.PROJECT_PATH
-    tmp_dir       = tempfile.TemporaryDirectory()
-    xml_file      = Path(tmp_dir.name) / "results.xml"
+    unity_cli = config.UNITY_CLI
+    project_path = config.PROJECT_PATH
+    tmp_dir = tempfile.TemporaryDirectory()
+    xml_file = Path(tmp_dir.name) / "results.xml"
 
     proc = _run_unity(project_path, unity_cli, str(xml_file))
     passed, failed, extra = _parse_results(xml_file)
@@ -65,6 +76,7 @@ def tester(task_spec) -> dict:
         """).strip(),
         "report_path": str(xml_file)
     }
+
 
 # локальный быстрый тест (запускать при необходимости)
 if __name__ == "__main__":

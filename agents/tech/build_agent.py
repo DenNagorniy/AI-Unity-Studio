@@ -1,5 +1,6 @@
+
+
 def run(input: dict) -> dict:
-    """
-    Заглушка BuildAgent. Собирает билд.
-    """
+    """Stub build agent."""
+
     return {"status": "build complete (placeholder)", "input": input}
