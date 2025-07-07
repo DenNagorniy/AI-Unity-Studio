@@ -23,6 +23,7 @@ from tools.gen_changelog import main as gen_changelog
 from tools.gen_summary import generate_summary
 from tools.gen_multifeature_summary import generate_multifeature_summary
 from tools.gen_agent_stats import generate_agent_stats
+from tools.gen_ci_overview import generate_ci_overview
 from utils.agent_journal import read_entries
 from utils.pipeline_config import load_config
 
@@ -171,6 +172,8 @@ def run_once(optimize: bool = False) -> tuple[Path, dict]:
     agent_results["Publish"] = publish_status
     summary_path = generate_summary(urls, agent_results, out_dir=str(reports))
     print(f"Summary HTML: {summary_path}")
+
+    generate_ci_overview(out_dir=str(reports))
 
     notify_all(str(summary_path), "CHANGELOG.md", urls)
 
