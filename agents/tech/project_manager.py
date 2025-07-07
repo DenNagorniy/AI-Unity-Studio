@@ -4,6 +4,7 @@
 import json
 
 from utils.llm import ask_mistral
+from utils.agent_journal import log_trace
 
 
 def run(feature: dict) -> dict:
@@ -23,7 +24,12 @@ def run(feature: dict) -> dict:
         data = json.loads(reply)
         tasks = data.get("tasks")
         if isinstance(tasks, list):
-            return {"tasks": tasks}
+            result = {"tasks": tasks}
+            log_trace("ProjectManagerAgent", "run", feature, result)
+            return result
     except json.JSONDecodeError:
         pass
-    return {"tasks": [{"feature": desc, "acceptance": ["Compiles"]}]}
+    result = {"tasks": [{"feature": desc, "acceptance": ["Compiles"]}]}
+    log_trace("ProjectManagerAgent", "run", feature, result)
+    return result
+

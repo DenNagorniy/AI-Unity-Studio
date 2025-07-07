@@ -22,14 +22,17 @@ def ask_multiline() -> str:
     return "\n".join(lines).strip()
 
 
-def main():
+def main(agents: list[str] | None = None):
     user_prompt = ask_multiline()
     if not user_prompt:
         print("❌ Пустой запрос — завершаю.")
         return
 
     # 1. Разбивка запроса
-    task_spec = task_manager(user_prompt)
+    if not agents or "ProjectManagerAgent" in agents:
+        task_spec = task_manager(user_prompt)
+    else:
+        task_spec = {}
     print("📋 Task-spec:")
     print(json.dumps(task_spec, indent=2, ensure_ascii=False))
     log_action("TeamLead", "pipeline start")
@@ -39,40 +42,51 @@ def main():
     print("🛠️ Patch:")
     print(json.dumps(patch, indent=2, ensure_ascii=False))
     # 1. Идея фичи
-    feature = game_designer.run({"text": user_prompt})
-    log_action("GameDesignerAgent", feature.get("feature", ""))
+    if not agents or "GameDesignerAgent" in agents:
+        feature = game_designer.run({"text": user_prompt})
+        log_action("GameDesignerAgent", feature.get("feature", ""))
+    else:
+        feature = {"feature": user_prompt}
 
     # 2. Архитектура
-    arch = architect_agent.run(feature)
-    log_action("ArchitectAgent", arch.get("path", ""))
+    if not agents or "ArchitectAgent" in agents:
+        arch = architect_agent.run(feature)
+        log_action("ArchitectAgent", arch.get("path", ""))
+    else:
+        arch = feature
 
     # 3. Код
-    patch = coder.run(arch)
-    log_action("CoderAgent", "patch generated")
-    apply_patch(patch)
+    if not agents or "CoderAgent" in agents:
+        patch = coder.run(arch)
+        log_action("CoderAgent", "patch generated")
+        apply_patch(patch)
 
     # 3. Тесты Unity CLI
-    report = run_tests(task_spec)
-    print("✅ Tester report:")
-    print(json.dumps(report, indent=2, ensure_ascii=False))
+    if not agents or "TesterAgent" in agents:
+        report = run_tests(task_spec)
+        print("✅ Tester report:")
+        print(json.dumps(report, indent=2, ensure_ascii=False))
     # 4. Review
-    review_agent.run({})
+    if not agents or "ReviewAgent" in agents:
+        review_agent.run({})
 
     # 5. Тесты
-    report = tester.run(arch)
-    log_action("TesterAgent", f"passed={report['passed']} failed={report['failed']}")
-    if report["failed"]:
-        raise SystemExit("❌ Тесты упали — почини код или перегенерируй запрос.")
-        update_feature("FT-unknown", feature.get("feature", ""), "failed")
-        log_action("TeamLead", "tests failed")
-        raise SystemExit("❌ Тесты упали")
+    if not agents or "TesterAgent" in agents:
+        report = tester.run(arch)
+        log_action("TesterAgent", f"passed={report['passed']} failed={report['failed']}")
+        if report["failed"]:
+            update_feature("FT-unknown", feature.get("feature", ""), "failed")
+            log_action("TeamLead", "tests failed")
+            raise SystemExit("❌ Тесты упали")
 
     # 6. Сборка
-    build_info = build_agent.run({"target": "WebGL"})
-    log_action("BuildAgent", build_info.get("status", ""))
+    if not agents or "BuildAgent" in agents:
+        build_info = build_agent.run({"target": "WebGL"})
+        log_action("BuildAgent", build_info.get("status", ""))
 
     # 7. Refactor
-    refactor_agent.run({})
+    if not agents or "RefactorAgent" in agents:
+        refactor_agent.run({})
 
     update_feature("FT-unknown", feature.get("feature", ""), "done")
 
@@ -88,3 +102,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

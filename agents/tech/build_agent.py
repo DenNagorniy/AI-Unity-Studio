@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 import config
-from utils.agent_journal import log_action
+from utils.agent_journal import log_action, log_trace
 
 
 def run(input: dict) -> dict:
@@ -35,4 +35,7 @@ def run(input: dict) -> dict:
 
     log_action("BuildAgent", status)
 
-    return {"target": target, "artifact": artifact, "status": status}
+    result = {"target": target, "artifact": artifact, "status": status}
+    log_trace("BuildAgent", "run", input, result)
+    return result
+

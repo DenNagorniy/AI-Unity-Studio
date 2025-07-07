@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 import config
-from utils.agent_journal import log_action
+from utils.agent_journal import log_action, log_trace
 
 
 def run(_: dict | None = None) -> dict:
@@ -55,4 +55,7 @@ def run(_: dict | None = None) -> dict:
         log_action("ReviewAgent", "clean")
         status = "success"
 
-    return {"status": status, "report": "review_report.json"}
+    result = {"status": status, "report": "review_report.json"}
+    log_trace("ReviewAgent", "run", None, result)
+    return result
+

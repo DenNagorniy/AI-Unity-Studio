@@ -14,6 +14,7 @@
 | BuildAgent          | Сборка WebGL / Android                      |
 | TeamLeadAgent       | Оркестрация, журналирование, метрики        |
 | AssetCrafter (v1.1) | Генерация ассетов, QC и каталог             |
+| AgentPlayground (v1.2) | REPL-интерфейс для отладки                |
 
 ### Status
 

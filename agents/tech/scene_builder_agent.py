@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from utils.agent_journal import log_trace
+
 
 def run(input: dict) -> dict:
     """Generate a simple scene description tied to the generated script."""
@@ -18,7 +20,10 @@ def run(input: dict) -> dict:
         "monobehaviours": [script_path],
     }
     json_path.write_text(json.dumps(scene_data, indent=2), encoding="utf-8")
-    return {
+    result = {
         "scene": str(json_path),
         "objects": scene_data["monobehaviours"],
     }
+    log_trace("SceneBuilderAgent", "run", input, result)
+    return result
+

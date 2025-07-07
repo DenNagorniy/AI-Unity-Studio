@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 import config
-from utils.agent_journal import log_action
+from utils.agent_journal import log_action, log_trace
 
 
 def run(input: dict) -> dict:
@@ -33,8 +33,11 @@ def run(input: dict) -> dict:
     else:
         log_action("RefactorAgent", "completed")
 
-    return {
+    result = {
         "returncode": proc.returncode or fmt_proc.returncode,
         "dead_code": dead_code,
         "report": str(report_path),
     }
+    log_trace("RefactorAgent", "run", input, result)
+    return result
+

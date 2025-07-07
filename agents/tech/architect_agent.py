@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import config
+from utils.agent_journal import log_trace
 
 
 def run(input: dict) -> dict:
@@ -26,9 +27,12 @@ def run(input: dict) -> dict:
             encoding="utf-8",
         )
 
-    return {
+    result = {
         "feature": feature,
         "path": path,
         "namespace": "AIUnityStudio.Generated",
         "asmdef": asmdef_file.stem,
     }
+    log_trace("ArchitectAgent", "run", input, result)
+    return result
+

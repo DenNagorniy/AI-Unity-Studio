@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import config
-from utils.agent_journal import log_action
+from utils.agent_journal import log_action, log_trace
 from utils.test_generation import generate_test_files
 
 from . import team_lead
@@ -103,12 +103,14 @@ def tester(task_spec) -> dict:
         total_failed == 0,
     )
 
-    return {
+    result = {
         "passed": total_passed,
         "failed": total_failed,
         "logs": "",
         "report_paths": [f"results_{p}.xml" for p in results.keys()],
     }
+    log_trace("TesterAgent", "run", task_spec, result)
+    return result
 
 
 def run(task_spec) -> dict:
@@ -118,3 +120,4 @@ def run(task_spec) -> dict:
 
 if __name__ == "__main__":
     print(json.dumps(tester({}), indent=2, ensure_ascii=False))
+

@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from utils.llm import ask_mistral
+from utils.agent_journal import log_trace
 
 
 def run(input: dict) -> dict:
@@ -21,4 +22,7 @@ def run(input: dict) -> dict:
     except json.JSONDecodeError:
         scene = {"scene": "intro", "dialogue": [reply]}
         scene_path.write_text(json.dumps(scene, indent=2, ensure_ascii=False), encoding="utf-8")
-    return {"scene": str(scene_path)}
+    result = {"scene": str(scene_path)}
+    log_trace("NarrativeDesignerAgent", "run", input, result)
+    return result
+

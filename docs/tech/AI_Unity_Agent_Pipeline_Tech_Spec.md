@@ -57,6 +57,21 @@ python tools/mapctl.py index    # обновить FeatureIndex.md
 python ci_test.py               # запустить тесты в CI
 python ci_build.py              # сборка проекта в CI
 python run_all.py               # полный цикл
+python agent_playground.py --repl   # интерактивный режим
+
+### pipeline_config.yaml
+Файл `pipeline_config.yaml` описывает этапы CI.
+
+```yaml
+steps:
+  build: true
+  publish: true
+  qc: true
+agents:
+  - CoderAgent
+  - TesterAgent
+```
+Можно отключать шаги или указать конкретных агентов.
 
 ## 📡 Dashboard API
 ```bash
