@@ -20,4 +20,6 @@ def apply_patch(patch):
         save_to_unity_structure(mod)
 
     # git add + commit (если нужно)
-    git_tools.commit_changes("AI applied patch")
+    committed = git_tools.commit_changes("AI applied patch")
+    if committed:
+        print("✅ Patch committed to git")

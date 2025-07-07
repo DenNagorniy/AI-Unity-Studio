@@ -16,8 +16,14 @@ def run(input: dict) -> dict:
         "/property:RunAnalyzers=true",
     ]
     proc = subprocess.run(analyze_cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise RuntimeError(f"Roslyn analyzers failed: {proc.stderr.strip()}")
 
-    dead_code = [line.strip() for line in proc.stdout.splitlines() if "warning" in line and "is never used" in line]
+    dead_code = [
+        line.strip()
+        for line in proc.stdout.splitlines()
+        if "warning" in line and "is never used" in line
+    ]
 
     format_cmd = [
         "dotnet",
@@ -26,6 +32,8 @@ def run(input: dict) -> dict:
         "--verify-no-changes",
     ]
     fmt_proc = subprocess.run(format_cmd, capture_output=True, text=True)
+    if fmt_proc.returncode != 0:
+        raise RuntimeError(f"dotnet format failed: {fmt_proc.stderr.strip()}")
 
     return {
         "returncode": proc.returncode or fmt_proc.returncode,

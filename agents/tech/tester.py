@@ -34,8 +34,13 @@ def run_unity_tests(project_path: str) -> dict:
             text=True,
         )
 
-        print(proc.stdout)
-        print(proc.stderr)
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"Unity CLI returned {proc.returncode} for {platform}: {proc.stderr.strip()}"
+            )
+
+        if not Path(result_file).exists():
+            raise RuntimeError(f"Result file not found: {result_file}")
 
         tree = ET.parse(result_file)
         root = tree.getroot()
