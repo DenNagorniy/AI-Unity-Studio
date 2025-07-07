@@ -3,7 +3,7 @@ import sys
 
 from agents.coder import coder
 from agents.task_manager import task_manager
-from agents.tester import tester
+from agents.tester import run as run_tests
 from config import PROJECT_PATH
 from utils.apply_patch import apply_patch
 
@@ -37,7 +37,7 @@ def main():
     apply_patch(patch, str(PROJECT_PATH))
 
     # 3. Тесты Unity CLI
-    report = tester(task_spec, str(PROJECT_PATH))
+    report = run_tests(task_spec)
     print("✅ Tester report:")
     print(json.dumps(report, indent=2, ensure_ascii=False))
 

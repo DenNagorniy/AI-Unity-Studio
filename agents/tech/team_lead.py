@@ -28,14 +28,25 @@ def log(msg: str) -> None:
     JOURNAL_PATH.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
-def update_project_map(feature: str, tested: bool) -> None:
-    """Mark feature as tested in project_map.json."""
+def update_project_map(feature_id: str, files: list, tested: bool):
     _ensure_files()
-    data = json.loads(PM_PATH.read_text(encoding="utf-8"))
-    features = data.setdefault("features", {})
-    info = features.setdefault(feature, {})
-    info["tested"] = tested
-    PM_PATH.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    with open("project_map.json", "r") as f:
+        data = json.load(f)
+
+    data["features"][feature_id] = {
+        "name": feature_id,
+        "status": "done" if tested else "failed",
+        "files": files,
+        "assets": [],
+        "created_by": "CoderAgent",
+        "created_at": datetime.utcnow().isoformat(),
+        "tested": tested,
+        "depends_on": [],
+        "deleted": False,
+    }
+
+    with open("project_map.json", "w") as f:
+        json.dump(data, f, indent=2)
 
 
 def record_metrics(metrics: dict) -> None:
@@ -49,5 +60,5 @@ def record_metrics(metrics: dict) -> None:
 def merge_feature(feature: str, metrics: dict) -> None:
     """Simulate merge of a feature and record metrics."""
     log(f"Merging feature {feature}")
-    update_project_map(feature, metrics.get("tests_passed", 0) > 0)
+    update_project_map(feature, [], metrics.get("tests_passed", 0) > 0)
     record_metrics({"feature": feature, **metrics})

@@ -12,6 +12,38 @@ import config
 from . import team_lead
 
 
+def run_unity_tests(project_path: str) -> dict:
+    result = subprocess.run(
+        [
+            "unity",
+            "-batchmode",
+            "-runTests",
+            "-projectPath",
+            project_path,
+            "-testResults",
+            "results.xml",
+            "-testPlatform",
+            "PlayMode",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    print(result.stdout)
+    print(result.stderr)
+
+    tree = ET.parse("results.xml")
+    root = tree.getroot()
+
+    failed = int(root.attrib.get("failed", 0))
+    passed = int(root.attrib.get("passed", 0))
+
+    if failed > 0:
+        raise RuntimeError(f"Tests failed: {failed} failed, {passed} passed")
+
+    return {"passed": passed, "failed": failed}
+
+
 def _ensure_playmode_test(script_path: str | None) -> None:
     """Create a simple PlayMode test template if none exists."""
     if not script_path:
@@ -106,8 +138,16 @@ def tester(task_spec) -> dict:
 
 def run(task_spec) -> dict:
     """Public wrapper used by the orchestrator."""
-    return tester(task_spec)
+    project_path = config.PROJECT_PATH
+    result = run_unity_tests(project_path)
+    files = []
+    if task_spec.get("path"):
+        files.append(task_spec["path"])
+    team_lead.update_project_map(
+        task_spec.get("feature", "unknown"), files, result["failed"] == 0
+    )
+    return result
 
 
 if __name__ == "__main__":
-    print(json.dumps(tester({}), indent=2, ensure_ascii=False))
+    print(json.dumps(run({}), indent=2, ensure_ascii=False))

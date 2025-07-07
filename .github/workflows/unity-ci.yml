@@ -1,0 +1,25 @@
+name: Unity CI
+
+on:
+  push:
+    branches: [ main, feature/** ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+      - name: dotnet build
+        run: dotnet build
+      - name: Unity PlayMode tests
+        run: |
+          unity -batchmode -runTests -projectPath . -testResults results.xml -testPlatform PlayMode
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: unity-test-results
+          path: results.xml

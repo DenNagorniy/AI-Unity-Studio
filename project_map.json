@@ -1,1 +1,18 @@
-{"schema_version":1,"features":{}}
+{
+  "schema_version": 1,
+  "features": {
+    "test_feature": {
+      "name": "test_feature",
+      "status": "done",
+      "files": [
+        "Assets/Tests/Generated/Test_TestFeature_Behaviour.cs"
+      ],
+      "assets": [],
+      "created_by": "CoderAgent",
+      "created_at": "2025-01-01T00:00:00Z",
+      "tested": true,
+      "depends_on": [],
+      "deleted": false
+    }
+  }
+}
