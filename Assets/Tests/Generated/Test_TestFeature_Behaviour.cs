@@ -1,3 +1,4 @@
+// Auto-generated test
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using UnityEngine;

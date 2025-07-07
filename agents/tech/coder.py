@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from utils.llm import ask_mistral
+from utils.test_generation import generate_test_files
 
 
 def coder(task_spec):
@@ -21,15 +22,16 @@ def coder(task_spec):
     if "namespace" not in code:
         code = f"namespace {namespace} {{\n{code}\n}}"
 
-    return {
-        "modifications": [
-            {
-                "path": path,
-                "content": code,
-                "action": "overwrite",
-            }
-        ]
-    }
+    mods = [
+        {
+            "path": path,
+            "content": code,
+            "action": "overwrite",
+        }
+    ]
+    mods.extend(generate_test_files(path, namespace, code))
+
+    return {"modifications": mods}
 
 
 def run(task_spec):
