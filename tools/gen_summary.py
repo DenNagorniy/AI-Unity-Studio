@@ -83,9 +83,7 @@ def generate_summary(
         "user": os.getenv("USER", "unknown"),
     }
     changelog_path = Path("CHANGELOG.md")
-    changelog = (
-        changelog_path.read_text(encoding="utf-8") if changelog_path.exists() else ""
-    )
+    changelog = changelog_path.read_text(encoding="utf-8") if changelog_path.exists() else ""
     html = _render(artifact_urls, agent_results, metadata, changelog)
     out_directory = Path(out_dir)
     out_directory.mkdir(exist_ok=True)

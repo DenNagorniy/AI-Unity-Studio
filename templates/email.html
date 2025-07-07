@@ -1,0 +1,12 @@
+<h2>CI Pipeline Notification</h2>
+<p>Summary report: {{ summary_path }}</p>
+{% if artifacts %}
+<h3>Artifacts</h3>
+<ul>
+{% for url in artifacts %}
+  <li><a href="{{ url }}">{{ url }}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+<h3>Changelog</h3>
+<pre>{{ changelog }}</pre>

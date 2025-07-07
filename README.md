@@ -38,6 +38,22 @@ python run_all.py  # полный цикл: пайплайн + тесты + би
 После успешного прогона в каталоге `ci_reports/` будут собраны отчёты тестов и
 сборки, а файл `final_summary.md` содержит краткий итог всех агентов.
 
+## Уведомления CI
+
+Для отправки уведомлений настройте переменные в `.env`:
+
+```bash
+SMTP_SERVER=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=user@example.com
+SMTP_PASS=yourpass
+SLACK_URL=https://hooks.slack.com/services/XXX
+TELEGRAM_TOKEN=bot-token
+TELEGRAM_CHAT_ID=123456
+```
+
+После выполнения `run_all.py` итоговое сообщение будет отправлено на Email, Slack и Telegram, а также сохранено в `agent_journal.log`.
+
 ## Лицензия
 
 ```makefile

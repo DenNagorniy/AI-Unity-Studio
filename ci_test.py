@@ -8,8 +8,9 @@ from pathlib import Path
 
 import config
 from agents.tech import tester
-from utils.feature_index import load_index, update_feature
+from notify import notify_all
 from tools.gen_changelog import main as gen_changelog
+from utils.feature_index import load_index, update_feature
 
 
 def main() -> None:
@@ -55,6 +56,8 @@ def main() -> None:
         for art in artifacts:
             print(f"- {art}")
     print(f"Changelog: {changelog_path}")
+
+    notify_all(str(Path("ci_reports") / "summary.html"), str(changelog_path), artifacts)
 
 
 if __name__ == "__main__":

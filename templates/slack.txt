@@ -1,0 +1,9 @@
+CI pipeline finished.
+Summary: {{ summary_path }}
+{% if artifacts %}
+Artifacts:
+{% for url in artifacts %}- {{ url }}
+{% endfor %}
+{% endif %}
+Changelog:
+{{ changelog }}
