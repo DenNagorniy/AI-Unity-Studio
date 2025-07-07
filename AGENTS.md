@@ -55,4 +55,4 @@
 
 ## Current Milestone
 
-v1.0 RC in progress
+v1.0 released

@@ -29,6 +29,7 @@ def main() -> None:
     (reports_dir / "ci_test.json").write_text(json.dumps(res, indent=2, ensure_ascii=False), encoding="utf-8")
 
     print(json.dumps(res, indent=2, ensure_ascii=False))
+    print("Test reports saved to ci_reports/")
 
 
 if __name__ == "__main__":
