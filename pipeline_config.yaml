@@ -1,0 +1,16 @@
+steps:
+  build: true
+  publish: true
+  qc: true
+agents:
+  - GameDesignerAgent
+  - ProjectManagerAgent
+  - ArchitectAgent
+  - SceneBuilderAgent
+  - CoderAgent
+  - TesterAgent
+  - BuildAgent
+  - RefactorAgent
+  - ReviewAgent
+  - AssetCrafter
+  - TeamLeadAgent

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from utils.llm import ask_mistral
 from utils.test_generation import generate_test_files
+from utils.agent_journal import log_trace
 
 
 def coder(task_spec):
@@ -31,9 +32,12 @@ def coder(task_spec):
     ]
     mods.extend(generate_test_files(path, namespace, code))
 
-    return {"modifications": mods}
+    result = {"modifications": mods}
+    log_trace("CoderAgent", "run", task_spec, result)
+    return result
 
 
 def run(task_spec):
     """Public wrapper used by the orchestrator."""
     return coder(task_spec)
+

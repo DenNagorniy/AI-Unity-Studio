@@ -16,14 +16,16 @@ from run_pipeline import main as pipeline_main
 from tools.gen_changelog import main as gen_changelog
 from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
+from utils.pipeline_config import load_config
 import ci_assets
 
 
 def main() -> None:
     """Execute full CI pipeline."""
+    cfg = load_config()
 
     if os.getenv("SKIP_PIPELINE") != "1":
-        pipeline_main()
+        pipeline_main(cfg.get("agents"))
 
     reports = Path(os.getenv("CI_REPORTS_DIR", "ci_reports"))
     reports.mkdir(exist_ok=True)
@@ -32,19 +34,22 @@ def main() -> None:
             shutil.copy(Path(name), reports / Path(name).name)
 
     ci_test.main()
-    ci_build.main()
+    if cfg["steps"].get("build", True):
+        ci_build.main()
 
     publish_status = "success"
-    try:
-        publish_main()
-    except Exception as e:  # noqa: PERF203
-        publish_status = "error"
-        print(f"Publish failed: {e}")
+    if cfg["steps"].get("publish", True):
+        try:
+            publish_main()
+        except Exception as e:  # noqa: PERF203
+            publish_status = "error"
+            print(f"Publish failed: {e}")
 
-    try:
-        ci_assets.main()
-    except Exception as e:  # noqa: PERF203
-        print(f"Asset pipeline failed: {e}")
+    if cfg["steps"].get("qc", True):
+        try:
+            ci_assets.main()
+        except Exception as e:  # noqa: PERF203
+            print(f"Asset pipeline failed: {e}")
 
     gen_changelog()
 

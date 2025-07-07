@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from utils.llm import ask_mistral
+from utils.agent_journal import log_trace
 
 
 def run(input: dict) -> dict:
@@ -12,4 +13,7 @@ def run(input: dict) -> dict:
     mood_dir.mkdir(exist_ok=True)
     path = mood_dir / "mood.txt"
     path.write_text(description, encoding="utf-8")
-    return {"moodboard": str(path)}
+    result = {"moodboard": str(path)}
+    log_trace("ArtMoodAgent", "run", input, result)
+    return result
+

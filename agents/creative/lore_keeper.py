@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from utils.llm import ask_mistral
+from utils.agent_journal import log_trace
 
 
 def run(input: dict) -> dict:
@@ -29,4 +30,7 @@ def run(input: dict) -> dict:
     except json.JSONDecodeError:
         lore[str(len(lore))] = reply
     lore_path.write_text(json.dumps(lore, indent=2, ensure_ascii=False), encoding="utf-8")
-    return {"lorebook": str(lore_path)}
+    result = {"lorebook": str(lore_path)}
+    log_trace("LoreKeeperAgent", "run", input, result)
+    return result
+
