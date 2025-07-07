@@ -1,0 +1,8 @@
+# Self-Monitoring Report
+
+Generated: {{ generated }}
+
+| Agent | Success % | Avg time (s) | Auto-fix % | Problems |
+|-------|-----------|--------------|------------|----------|
+{% for r in rows %}| {{ r.agent }} | {{ r.success }} | {{ r.avg_time or 'n/a' }} | {{ r.autofix }} | {{ r.problems }} |
+{% endfor %}

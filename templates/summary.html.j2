@@ -44,6 +44,13 @@
   <pre>{{ self_improvement }}</pre>
 </details>
 
+<h2>⚠️ Self-Monitoring Report</h2>
+{% if self_monitor %}
+<p><a href="{{ self_monitor }}">{{ self_monitor }}</a></p>
+{% else %}
+<p>n/a</p>
+{% endif %}
+
 <h2>Metadata</h2>
 <ul>
   <li>Date: {{ metadata.date }}</li>
