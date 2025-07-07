@@ -1,3 +1,4 @@
+// Auto-generated test
 using NUnit.Framework;
 using AIUnityStudio.Generated;
 

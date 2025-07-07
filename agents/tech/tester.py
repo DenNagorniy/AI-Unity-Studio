@@ -8,6 +8,7 @@ from pathlib import Path
 import config
 
 from . import team_lead
+from utils.test_generation import generate_test_files
 
 
 def run_unity_tests(project_path: str) -> dict:
@@ -57,31 +58,31 @@ def run_unity_tests(project_path: str) -> dict:
     return results
 
 
-def _ensure_playmode_test(script_path: str | None) -> None:
-    """Create a simple PlayMode test template if none exists."""
+def _ensure_playmode_test(script_path: str | None, namespace: str) -> None:
+    """Create simple EditMode/PlayMode tests if none exist."""
     if not script_path:
         return
-    test_dir = Path("Assets/Tests/PlayMode")
-    test_dir.mkdir(parents=True, exist_ok=True)
+
     class_name = Path(script_path).stem
-    test_file = test_dir / f"{class_name}Test.cs"
-    if test_file.exists():
+    test_dir = Path("Assets/Tests/Generated")
+    logic_path = test_dir / f"Test_{class_name}_Logic.cs"
+    behaviour_path = test_dir / f"Test_{class_name}_Behaviour.cs"
+
+    if logic_path.exists() and behaviour_path.exists():
         return
-    content = (
-        f"using NUnit.Framework;\n"
-        f"public class {class_name}Test {{\n"
-        f"    [Test]\n"
-        f"    public void TestSimplePasses() {{\n"
-        f"        Assert.Pass();\n"
-        f"    }}\n"
-        f"}}\n"
-    )
-    test_file.write_text(content, encoding="utf-8")
+
+    mods = generate_test_files(script_path, namespace)
+    for mod in mods:
+        path = Path(mod["path"])
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(mod["content"], encoding="utf-8")
 
 
 def tester(task_spec) -> dict:
     project_path = config.PROJECT_PATH
-    _ensure_playmode_test(task_spec.get("path"))
+    _ensure_playmode_test(
+        task_spec.get("path"), task_spec.get("namespace", "AIUnityStudio.Generated")
+    )
 
     results = run_unity_tests(project_path)
 
