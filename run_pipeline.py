@@ -1,6 +1,9 @@
 import json
 import sys
 from pathlib import Path
+import argparse
+
+import agent_memory
 
 from agents.tech import architect_agent, build_agent, coder, game_designer, refactor_agent, review_agent, tester
 from agents.tech.project_manager import run as task_manager
@@ -22,7 +25,9 @@ def ask_multiline() -> str:
     return "\n".join(lines).strip()
 
 
-def main(agents: list[str] | None = None):
+def main(agents: list[str] | None = None, use_memory: bool = False):
+    if use_memory:
+        agent_memory.enable()
     user_prompt = ask_multiline()
     if not user_prompt:
         print("❌ Пустой запрос — завершаю.")
@@ -101,5 +106,9 @@ def main(agents: list[str] | None = None):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run agent pipeline")
+    parser.add_argument("--use-memory", action="store_true", help="Enable shared memory")
+    parser.add_argument("--agents", nargs="*", help="Subset of agents to run")
+    args = parser.parse_args()
+    main(args.agents, use_memory=args.use_memory)
 

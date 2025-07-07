@@ -61,6 +61,19 @@ python agent_playground.py --agent CoderAgent --input '{"feature": "Jump"}'
 python agent_playground.py --repl  # REPL-режим
 ```
 
+## Shared Memory
+
+Флаг `--use-memory` включает общую память между агентами. Модуль
+`agent_memory.py` сохраняет данные в `agent_memory.json` и предоставляет
+функции `read(key)` и `write(key, value)`.
+
+```bash
+python run_pipeline.py --use-memory
+```
+
+Ключи памяти по умолчанию:
+`feature_description`, `tasks`, `architecture`, `scene`, `patch`.
+
 ## Уведомления CI
 
 Для отправки уведомлений настройте переменные в `.env`:

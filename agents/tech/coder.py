@@ -5,10 +5,13 @@ from pathlib import Path
 from utils.llm import ask_mistral
 from utils.test_generation import generate_test_files
 from utils.agent_journal import log_trace
+import agent_memory
 
 
 def coder(task_spec):
     """Generate a C# script using local LLM."""
+    if not task_spec:
+        task_spec = agent_memory.read("architecture") or {}
     path = task_spec.get("path", "Generated/Feature.cs")
     namespace = task_spec.get("namespace", "AIUnityStudio.Generated")
     feature = task_spec.get("feature", "")
@@ -34,6 +37,7 @@ def coder(task_spec):
 
     result = {"modifications": mods}
     log_trace("CoderAgent", "run", task_spec, result)
+    agent_memory.write("patch", result)
     return result
 
 
