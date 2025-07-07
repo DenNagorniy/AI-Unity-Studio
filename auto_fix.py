@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import difflib
 import json
 from pathlib import Path
 
+import agent_learning
 from agents.tech import coder, refactor_agent, scene_builder_agent
+from config import UNITY_SCRIPTS_PATH
 from utils.agent_journal import log_auto_fix
 from utils.apply_patch import apply_patch
 
@@ -34,10 +37,37 @@ def auto_fix(feature_name: str, agent_name: str, error: str) -> bool:
 
     patch_file = patch_dir / f"{feature_name}_{agent_name}.json"
     patch_file.write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    diffs = []
+    for mod in result.get("modifications", []):
+        target = Path(UNITY_SCRIPTS_PATH) / mod["path"]
+        old = target.read_text(encoding="utf-8") if target.exists() else ""
+        new = mod.get("content", "")
+        diff = difflib.unified_diff(
+            old.splitlines(),
+            new.splitlines(),
+            fromfile=f"before/{mod['path']}",
+            tofile=f"after/{mod['path']}",
+            lineterm="",
+        )
+        diffs.append("\n".join(diff))
+
     try:
         apply_patch(result)
         log_auto_fix(agent_name, "success", f"applied {patch_file.name}")
+        agent_learning.record_interaction(
+            f"AutoFix:{agent_name}",
+            error,
+            "\n".join(diffs),
+            "success",
+        )
         return True
     except Exception as exc:  # noqa: PERF203
         log_auto_fix(agent_name, "error", str(exc))
+        agent_learning.record_interaction(
+            f"AutoFix:{agent_name}",
+            error,
+            "\n".join(diffs),
+            "error",
+        )
         return False
