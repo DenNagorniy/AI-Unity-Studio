@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "features": [
+    {"id": "FT-001", "name": "test_feature", "status": "done"},
+    {"id": "FT-002", "name": "inventory_system", "status": "in_progress"}
+  ]
+}

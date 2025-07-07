@@ -14,6 +14,19 @@
 | BuildAgent          | Сборка WebGL / Android                      |
 | TeamLeadAgent       | Оркестрация, журналирование, метрики        |
 
+### Status
+
+* GameDesignerAgent — ready
+* ProjectManagerAgent — ready
+* ArchitectAgent — ready
+* SceneBuilderAgent — ready
+* CoderAgent — ready
+* TesterAgent — ready
+* RefactorAgent — ready
+* ReviewAgent — ready
+* BuildAgent — ready
+* TeamLeadAgent — ready
+
 ## 🎨 Creative Agents
 
 | Агент                  | Роль                                      |
@@ -39,3 +52,7 @@
 | v0.8    | Multi-platform билд                   |
 | v0.9    | Asset pipeline                        |
 | v1.0    | Production AI studio                  |
+
+## Current Milestone
+
+v1.0 in progress

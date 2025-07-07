@@ -1,6 +1,7 @@
 import json
 import pathlib
 import sys
+from pathlib import Path
 from typing import Dict
 
 import click
@@ -71,6 +72,25 @@ def summary():
     if total:
         coverage = tested_count / total * 100
         click.echo(f"\nCoverage: {coverage:.1f}% ({tested_count}/{total})")
+
+
+@cli.command()
+def index():
+    """Generate FeatureIndex.md from project_map.json."""
+    if not PM_PATH.exists():
+        click.echo("project_map.json not found")
+        return
+
+    data = json.loads(PM_PATH.read_text(encoding="utf-8"))
+    feats = data.get("features", {})
+    lines = ["# Feature Index", "", "| Feature | Tested | Files |", "|---------|--------|-------|"]
+    for name, feat in feats.items():
+        tested = "✅" if feat.get("tested") else "❌"
+        files = len(feat.get("files", []))
+        lines.append(f"| {name} | {tested} | {files} |")
+
+    Path("FeatureIndex.md").write_text("\n".join(lines), encoding="utf-8")
+    click.secho("FeatureIndex.md updated", fg="green")
 
 
 if __name__ == "__main__":
