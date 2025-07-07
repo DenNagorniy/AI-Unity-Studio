@@ -119,6 +119,19 @@ TELEGRAM_CHAT_ID=123456
 
 Обе утилиты вызываются автоматически из `run_all.py`.
 
+## Agent Learning Report
+
+Скрипт `tools/gen_learning_report.py` анализирует файл `agent_memory.json` и
+создаёт страницу `ci_reports/learning_report.html` c краткой статистикой по
+агентам.
+
+Пример строки отчёта:
+
+```
+Agent  Calls  Successes  Fixes  Example Prompt          Hint
+Coder  12     10         2      "Создай MonoBehaviour"  "Использован шаблон BaseMono"
+```
+
 ## Лицензия
 
 ```makefile

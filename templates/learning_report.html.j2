@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Agent Learning Report</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 4px 8px; }
+</style>
+</head>
+<body>
+<h1>Agent Learning Report</h1>
+<table>
+<tr>
+  <th>Agent</th>
+  <th>Уникальных успешных вызовов</th>
+  <th>Примеры запросов и hint'ов</th>
+  <th>Кол-во auto-fix паттернов</th>
+</tr>
+{% for s in stats %}
+<tr>
+  <td>{{ s.agent }}</td>
+  <td>{{ s.unique_success }}</td>
+  <td>
+    <ul>
+    {% for ex in s.examples %}
+      <li><b>{{ ex.input }}</b> → {{ ex.hint }}</li>
+    {% endfor %}
+    </ul>
+  </td>
+  <td>{{ s.auto_fix }}</td>
+</tr>
+{% endfor %}
+</table>
+<h2>Metadata</h2>
+<ul>
+  <li>Дата: {{ metadata.date }}</li>
+  <li>Пользователь: {{ metadata.user }}</li>
+</ul>
+</body>
+</html>

@@ -2,17 +2,55 @@ from __future__ import annotations
 
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 
 from utils.agent_journal import read_entries
 from utils.feature_index import load_index
 
 
+def _load_learning_stats() -> dict:
+    path = Path("agent_memory.json")
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        log = data.get("learning_log", {})
+    except Exception:
+        return {}
+
+    stats: dict[str, dict] = {}
+    for agent, entries in log.items():
+        if agent.startswith("AutoFix:"):
+            continue
+        total = len(entries)
+        successful = sum(1 for e in entries if e.get("result") == "success")
+        examples = [e.get("input", "") for e in entries[:3]]
+        auto_entries = log.get(f"AutoFix:{agent}", [])
+        auto_patterns = {
+            e.get("output")
+            for e in auto_entries
+            if e.get("result") == "success" and e.get("output")
+        }
+        stats[agent] = {
+            "total_calls": total,
+            "successful": successful,
+            "auto_fixes": len(auto_patterns),
+            "examples": examples,
+        }
+    return stats
+
+
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: D401
-        if self.path != "/data":
+        if self.path == "/data":
+            self._send_json(self._collect_data())
+        elif self.path == "/learning":
+            self._send_json(_load_learning_stats())
+        else:
             self.send_response(404)
             self.end_headers()
-            return
+
+    def _collect_data(self) -> dict:
         review_data = {}
         try:
             with open("review_report.json", "r", encoding="utf-8") as f:
@@ -20,11 +58,13 @@ class Handler(BaseHTTPRequestHandler):
         except FileNotFoundError:
             pass
 
-        data = {
+        return {
             "index": load_index(),
             "journal": read_entries(),
             "review": review_data,
         }
+
+    def _send_json(self, data: dict) -> None:
         body = json.dumps(data).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
