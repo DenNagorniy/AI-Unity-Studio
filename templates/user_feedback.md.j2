@@ -1,0 +1,9 @@
+# User Feedback Report
+
+{% for feat, entries in feedback.items() %}
+## {{ feat }}
+| Variant | Rating | Comment | Reason |
+|---------|--------|---------|--------|
+{% for e in entries %}| {{ e.variant }} | {{ e.rating }} | {{ e.comment }} | {{ e.reason }} |
+{% endfor %}
+{% endfor %}

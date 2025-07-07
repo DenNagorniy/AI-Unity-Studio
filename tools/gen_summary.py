@@ -14,8 +14,8 @@ from jinja2 import Environment
 TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Pipeline Summary</title>
+  <meta charset="UTF-8">
+  <title>Pipeline Summary</title>
 <style>
   body { font-family: Arial, sans-serif; }
   table { border-collapse: collapse; }
@@ -46,6 +46,9 @@ TEMPLATE = """<!DOCTYPE html>
 <h2>Lore Validation</h2>
 <p>Status: {{ agent_results.get('LoreValidatorAgent', 'n/a') }}</p>
 
+<h2>User Feedback</h2>
+<pre>{{ feedback }}</pre>
+
 <h2>Metadata</h2>
 <ul>
   <li>Date: {{ metadata.date }}</li>
@@ -63,6 +66,7 @@ def _render(
     agent_results: dict[str, str],
     metadata: dict[str, str],
     changelog: str,
+    feedback: str,
 ) -> str:
     env = Environment()
     template = env.from_string(TEMPLATE)
@@ -71,12 +75,14 @@ def _render(
         agent_results=agent_results,
         metadata=metadata,
         changelog=changelog,
+        feedback=feedback,
     )
 
 
 def generate_summary(
     artifact_urls: list[str],
     agent_results: dict[str, str],
+    feedback: str = "",
     out_dir: str = "ci_reports",
 ) -> Path:
     """Create summary.html from given data."""
@@ -100,7 +106,7 @@ def generate_summary(
     if asset_report.exists():
         artifact_urls = list(artifact_urls) + [asset_report.as_posix()]
 
-    html = _render(artifact_urls, agent_results, metadata, changelog)
+    html = _render(artifact_urls, agent_results, metadata, changelog, feedback)
     out_directory = Path(out_dir)
     out_directory.mkdir(exist_ok=True)
     out_path = out_directory / "summary.html"
@@ -111,7 +117,8 @@ def generate_summary(
 def main() -> None:
     urls = json.loads(os.getenv("SUMMARY_ARTIFACTS", "[]"))
     agents = json.loads(os.getenv("SUMMARY_AGENTS", "{}"))
-    path = generate_summary(urls, agents)
+    feedback = os.getenv("SUMMARY_FEEDBACK", "")
+    path = generate_summary(urls, agents, feedback)
     print(path)
 
 
