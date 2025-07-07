@@ -9,10 +9,12 @@ from pathlib import Path
 
 import ci_build
 import ci_test
-from ci_publish import _load_env, main as publish_main
-from tools.gen_summary import generate_summary
+from ci_publish import _load_env
+from ci_publish import main as publish_main
+from notify import notify_all
 from run_pipeline import main as pipeline_main
 from tools.gen_changelog import main as gen_changelog
+from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
 
 
@@ -49,16 +51,10 @@ def main() -> None:
     ]
     agent_results = {}
     try:
-        test_data = json.loads(
-            (reports / "ci_test.json").read_text(encoding="utf-8")
-        )
-        build_data = json.loads(
-            (reports / "ci_build.json").read_text(encoding="utf-8")
-        )
+        test_data = json.loads((reports / "ci_test.json").read_text(encoding="utf-8"))
+        build_data = json.loads((reports / "ci_build.json").read_text(encoding="utf-8"))
         test_status = "error" if "error" in test_data else "success"
-        build_status = (
-            "success" if build_data.get("status") == "success" else "error"
-        )
+        build_status = "success" if build_data.get("status") == "success" else "error"
         agent_results["TesterAgent"] = test_status
         agent_results["BuildAgent"] = build_status
         summary_lines += [
@@ -73,9 +69,7 @@ def main() -> None:
     urls = []
     try:
         cfg = _load_env()
-        artifacts = [
-            p for p in reports.iterdir() if p.suffix in {".zip", ".apk"}
-        ]
+        artifacts = [p for p in reports.iterdir() if p.suffix in {".zip", ".apk"}]
         base = cfg["S3_ENDPOINT"].rstrip("/")
         urls = [f"{base}/{cfg['S3_BUCKET']}/{p.name}" for p in artifacts]
         if urls:
@@ -94,6 +88,8 @@ def main() -> None:
     agent_results["Publish"] = publish_status
     summary_path = generate_summary(urls, agent_results, out_dir=str(reports))
     print(f"Summary HTML: {summary_path}")
+
+    notify_all(str(summary_path), "CHANGELOG.md", urls)
 
 
 if __name__ == "__main__":
