@@ -6,9 +6,10 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import config
+from utils.agent_journal import log_action
+from utils.test_generation import generate_test_files
 
 from . import team_lead
-from utils.test_generation import generate_test_files
 
 
 def run_unity_tests(project_path: str) -> dict:
@@ -35,9 +36,7 @@ def run_unity_tests(project_path: str) -> dict:
         )
 
         if proc.returncode != 0:
-            raise RuntimeError(
-                f"Unity CLI returned {proc.returncode} for {platform}: {proc.stderr.strip()}"
-            )
+            raise RuntimeError(f"Unity CLI returned {proc.returncode} for {platform}: {proc.stderr.strip()}")
 
         if not Path(result_file).exists():
             raise RuntimeError(f"Result file not found: {result_file}")
@@ -85,14 +84,18 @@ def _ensure_playmode_test(script_path: str | None, namespace: str) -> None:
 
 def tester(task_spec) -> dict:
     project_path = config.PROJECT_PATH
-    _ensure_playmode_test(
-        task_spec.get("path"), task_spec.get("namespace", "AIUnityStudio.Generated")
-    )
+    _ensure_playmode_test(task_spec.get("path"), task_spec.get("namespace", "AIUnityStudio.Generated"))
 
     results = run_unity_tests(project_path)
 
     total_passed = sum(r["passed"] for r in results.values())
     total_failed = sum(r["failed"] for r in results.values())
+    total_tests = total_passed + total_failed + sum(r["skipped"] for r in results.values())
+    coverage = (total_passed / total_tests) * 100 if total_tests else 0
+    log_action("TesterAgent", f"coverage={coverage:.1f}%")
+    if coverage < 80:
+        log_action("TesterAgent", "low coverage")
+        raise RuntimeError(f"Coverage {coverage:.1f}% below threshold")
 
     team_lead.update_project_map(
         task_spec.get("feature", "unknown"),
