@@ -1,0 +1,11 @@
+# Auto-Failure Report
+
+{% for f in failures %}
+## {{ f.agent }}
+- Stage: {{ f.stage }}
+- Failures: {{ f.count }}
+- Exception: {{ f.exception }}
+{% endfor %}
+
+### TeamLead Recommendations
+{{ recommendations }}
