@@ -3,6 +3,7 @@ import json
 import sys
 from pathlib import Path
 
+import agent_learning
 import agent_memory
 from agents.tech import architect_agent, build_agent, coder, game_designer, refactor_agent, review_agent, tester
 from agents.tech.project_manager import run as task_manager
@@ -33,9 +34,19 @@ def main(agents: list[str] | None = None, use_memory: bool = False):
         print("❌ Пустой запрос — завершаю.")
         return
 
+    if use_memory:
+        hint = agent_learning.get_agent_hint("ProjectManagerAgent", user_prompt)
+        if hint:
+            print(f"💡 Hint for ProjectManagerAgent: {hint}")
+
     # 1. Разбивка запроса
     if not agents or "ProjectManagerAgent" in agents:
-        task_spec = task_manager(user_prompt)
+        try:
+            task_spec = task_manager(user_prompt)
+            agent_learning.record_interaction("ProjectManagerAgent", user_prompt, task_spec, "success")
+        except Exception as e:  # noqa: PERF203
+            agent_learning.record_interaction("ProjectManagerAgent", user_prompt, str(e), "error")
+            raise
     else:
         task_spec = {}
     print("📋 Task-spec:")
@@ -43,53 +54,100 @@ def main(agents: list[str] | None = None, use_memory: bool = False):
     log_action("TeamLead", "pipeline start")
 
     # 2. Генерация патча
+    if use_memory:
+        hint = agent_learning.get_agent_hint("CoderAgent", task_spec)
+        if hint:
+            print(f"💡 Hint for CoderAgent: {hint}")
     patch = coder.run(task_spec)
+    agent_learning.record_interaction("CoderAgent", task_spec, patch, "success")
     print("🛠️ Patch:")
     print(json.dumps(patch, indent=2, ensure_ascii=False))
     # 1. Идея фичи
     if not agents or "GameDesignerAgent" in agents:
-        feature = game_designer.run({"text": user_prompt})
-        log_action("GameDesignerAgent", feature.get("feature", ""))
+        if use_memory:
+            hint = agent_learning.get_agent_hint("GameDesignerAgent", user_prompt)
+            if hint:
+                print(f"💡 Hint for GameDesignerAgent: {hint}")
+        try:
+            feature = game_designer.run({"text": user_prompt})
+            log_action("GameDesignerAgent", feature.get("feature", ""))
+            agent_learning.record_interaction("GameDesignerAgent", user_prompt, feature, "success")
+        except Exception as e:  # noqa: PERF203
+            agent_learning.record_interaction("GameDesignerAgent", user_prompt, str(e), "error")
+            raise
     else:
         feature = {"feature": user_prompt}
 
     # 2. Архитектура
     if not agents or "ArchitectAgent" in agents:
-        arch = architect_agent.run(feature)
-        log_action("ArchitectAgent", arch.get("path", ""))
+        if use_memory:
+            hint = agent_learning.get_agent_hint("ArchitectAgent", feature)
+            if hint:
+                print(f"💡 Hint for ArchitectAgent: {hint}")
+        try:
+            arch = architect_agent.run(feature)
+            log_action("ArchitectAgent", arch.get("path", ""))
+            agent_learning.record_interaction("ArchitectAgent", feature, arch, "success")
+        except Exception as e:  # noqa: PERF203
+            agent_learning.record_interaction("ArchitectAgent", feature, str(e), "error")
+            raise
     else:
         arch = feature
 
     # 3. Код
     if not agents or "CoderAgent" in agents:
+        if use_memory:
+            hint = agent_learning.get_agent_hint("CoderAgent", arch)
+            if hint:
+                print(f"💡 Hint for CoderAgent: {hint}")
         try:
             patch = coder.run(arch)
             log_action("CoderAgent", "patch generated")
             apply_patch(patch)
+            agent_learning.record_interaction("CoderAgent", arch, patch, "success")
         except Exception as e:  # noqa: PERF203
-            auto_fix(feature.get("feature", ""), "CoderAgent", str(e))
+            fix_result = auto_fix(feature.get("feature", ""), "CoderAgent", str(e))
+            agent_learning.record_interaction("AutoFix", str(e), fix_result, "success" if fix_result else "error")
             patch = coder.run(arch)
             log_action("CoderAgent", "patch generated")
             apply_patch(patch)
+            agent_learning.record_interaction("CoderAgent", arch, patch, "error")
 
     # 3. Тесты Unity CLI
     if not agents or "TesterAgent" in agents:
+        if use_memory:
+            hint = agent_learning.get_agent_hint("TesterAgent", task_spec)
+            if hint:
+                print(f"💡 Hint for TesterAgent: {hint}")
         report = run_tests(task_spec)
         print("✅ Tester report:")
         print(json.dumps(report, indent=2, ensure_ascii=False))
+        agent_learning.record_interaction("TesterAgent", task_spec, report, "success")
     # 4. Review
     if not agents or "ReviewAgent" in agents:
-        review_agent.run({})
+        if use_memory:
+            hint = agent_learning.get_agent_hint("ReviewAgent", {})
+            if hint:
+                print(f"💡 Hint for ReviewAgent: {hint}")
+        result = review_agent.run({})
+        agent_learning.record_interaction("ReviewAgent", {}, result, "success")
 
     # 5. Тесты
     if not agents or "TesterAgent" in agents:
+        if use_memory:
+            hint = agent_learning.get_agent_hint("TesterAgent", arch)
+            if hint:
+                print(f"💡 Hint for TesterAgent: {hint}")
         try:
             report = tester.run(arch)
             if report["failed"]:
                 raise RuntimeError("tests failed")
+            agent_learning.record_interaction("TesterAgent", arch, report, "success")
         except Exception as e:  # noqa: PERF203
-            auto_fix(feature.get("feature", ""), "TesterAgent", str(e))
+            fix_result = auto_fix(feature.get("feature", ""), "TesterAgent", str(e))
+            agent_learning.record_interaction("AutoFix", str(e), fix_result, "success" if fix_result else "error")
             report = tester.run(arch)
+            agent_learning.record_interaction("TesterAgent", arch, report, "error")
         log_action("TesterAgent", f"passed={report['passed']} failed={report['failed']}")
         if report["failed"]:
             update_feature("FT-unknown", feature.get("feature", ""), "failed")
@@ -98,16 +156,28 @@ def main(agents: list[str] | None = None, use_memory: bool = False):
 
     # 6. Сборка
     if not agents or "BuildAgent" in agents:
+        if use_memory:
+            hint = agent_learning.get_agent_hint("BuildAgent", {"target": "WebGL"})
+            if hint:
+                print(f"💡 Hint for BuildAgent: {hint}")
         try:
             build_info = build_agent.run({"target": "WebGL"})
+            agent_learning.record_interaction("BuildAgent", {"target": "WebGL"}, build_info, "success")
         except Exception as e:  # noqa: PERF203
-            auto_fix(feature.get("feature", ""), "BuildAgent", str(e))
+            fix_result = auto_fix(feature.get("feature", ""), "BuildAgent", str(e))
+            agent_learning.record_interaction("AutoFix", str(e), fix_result, "success" if fix_result else "error")
             build_info = build_agent.run({"target": "WebGL"})
+            agent_learning.record_interaction("BuildAgent", {"target": "WebGL"}, build_info, "error")
         log_action("BuildAgent", build_info.get("status", ""))
 
     # 7. Refactor
     if not agents or "RefactorAgent" in agents:
-        refactor_agent.run({})
+        if use_memory:
+            hint = agent_learning.get_agent_hint("RefactorAgent", {})
+            if hint:
+                print(f"💡 Hint for RefactorAgent: {hint}")
+        result = refactor_agent.run({})
+        agent_learning.record_interaction("RefactorAgent", {}, result, "success")
 
     update_feature("FT-unknown", feature.get("feature", ""), "done")
 
