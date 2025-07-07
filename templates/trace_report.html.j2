@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Agent Trace Report</title>
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 4px 8px; }
+</style>
+</head>
+<body>
+<h1>Agent Trace Report</h1>
+<table>
+<tr>
+  <th>Agent</th>
+  <th>Total time (s)</th>
+  <th>Average (s)</th>
+  <th>Calls</th>
+</tr>
+{% for s in stats %}
+<tr>
+  <td>{{ s.agent }}</td>
+  <td>{{ s.total }}</td>
+  <td>{{ s.avg }}</td>
+  <td>{{ s.count }}</td>
+</tr>
+{% endfor %}
+</table>
+<h2>Recommended --skip flags</h2>
+<ul>
+{% for f in flags %}
+<li>{{ f }}</li>
+{% endfor %}
+</ul>
+<div id="timeline" style="width:100%;height:400px;"></div>
+<script>
+var agents = {{ timeline | map(attribute='agent') | list | tojson }};
+var base = {{ timeline | map(attribute='start') | list | tojson }};
+var durations = {{ timeline | map(attribute='duration') | list | tojson }};
+var statuses = {{ timeline | map(attribute='status') | list | tojson }};
+var data = [{
+  type: 'bar',
+  orientation: 'h',
+  x: durations,
+  y: agents,
+  base: base,
+  text: statuses,
+  hovertemplate: '%{y}<br>start:%{base}<br>duration:%{x}s<extra>%{text}</extra>'
+}];
+var layout = {title: 'Agent timeline', barmode: 'stack'};
+Plotly.newPlot('timeline', data, layout);
+</script>
+<h2>Metadata</h2>
+<ul>
+  <li>Date: {{ metadata.date }}</li>
+  <li>User: {{ metadata.user }}</li>
+</ul>
+</body>
+</html>
