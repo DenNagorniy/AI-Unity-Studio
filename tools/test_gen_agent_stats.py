@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 from tools.gen_agent_stats import generate_agent_stats
 
@@ -32,8 +31,18 @@ def test_generate_agent_stats(tmp_path, monkeypatch):
 
     trace = tmp_path / "agent_trace.log"
     entries = [
-        {"agent": "CoderAgent", "start_time": "2024-01-01T00:00:00", "end_time": "2024-01-01T00:00:02", "status": "success"},
-        {"agent": "TesterAgent", "start_time": "2024-01-01T00:00:03", "end_time": "2024-01-01T00:00:05", "status": "error"}
+        {
+            "agent": "CoderAgent",
+            "start_time": "2024-01-01T00:00:00",
+            "end_time": "2024-01-01T00:00:02",
+            "status": "success",
+        },
+        {
+            "agent": "TesterAgent",
+            "start_time": "2024-01-01T00:00:03",
+            "end_time": "2024-01-01T00:00:05",
+            "status": "error",
+        },
     ]
     with trace.open("w", encoding="utf-8") as f:
         for e in entries:

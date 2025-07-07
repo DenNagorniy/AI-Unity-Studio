@@ -82,7 +82,12 @@ def _recommend_flags(entries: List[Dict[str, Any]]) -> List[str]:
     return flags
 
 
-def _render(stats: List[Dict[str, Any]], timeline: List[Dict[str, Any]], flags: List[str], metadata: Dict[str, str]) -> str:
+def _render(
+    stats: List[Dict[str, Any]],
+    timeline: List[Dict[str, Any]],
+    flags: List[str],
+    metadata: Dict[str, str],
+) -> str:
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
     template = env.get_template(TEMPLATE_NAME)
     return template.render(stats=stats, timeline=timeline, flags=flags, metadata=metadata)

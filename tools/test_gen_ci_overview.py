@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 from tools.gen_ci_overview import generate_ci_overview
 import tools.gen_agent_stats as gen_stats
