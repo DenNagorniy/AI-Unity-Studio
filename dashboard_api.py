@@ -101,6 +101,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(_load_trace_stats())
         elif self.path == "/agent-stats":
             self._send_html_file(Path("ci_reports") / "agent_stats.html")
+        elif self.path == "/overview":
+            self._send_html_file(Path("ci_reports") / "ci_overview.html")
         else:
             self.send_response(404)
             self.end_headers()

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CI Overview</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    table { border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; }
+    .in_progress { background-color: #fff9c4; }
+    .done { background-color: #c8e6c9; }
+    .error { background-color: #ffcdd2; }
+  </style>
+  <script>
+    function toTime(val) {
+      if (!val) return '';
+      if (typeof val === 'number') {
+        return new Date(val * 1000).toLocaleTimeString();
+      }
+      return new Date(val).toLocaleTimeString();
+    }
+
+    const icons = {
+      in_progress: '🟡',
+      done: '🟢',
+      error: '🔴'
+    };
+
+    async function refreshProgress() {
+      const resp = await fetch('{{ monitor_url }}');
+      const json = await resp.json();
+      let items = json.features;
+      if (!items) {
+        items = Object.entries(json).map(([feature, info]) => ({ feature, ...info }));
+      }
+      const tbody = document.getElementById('progress-body');
+      tbody.innerHTML = '';
+      for (const f of items) {
+        const tr = document.createElement('tr');
+        tr.className = f.status;
+        const icon = icons[f.status] || '';
+        tr.innerHTML = `<td>${f.feature || f.name}</td>`+
+                       `<td>${icon} ${f.status}</td>`+
+                       `<td>${toTime(f.started)}</td>`+
+                       `<td>${toTime(f.ended)}</td>`;
+        tbody.appendChild(tr);
+      }
+    }
+
+    setInterval(refreshProgress, 10000);
+    window.onload = refreshProgress;
+  </script>
+</head>
+<body>
+<h1>CI Overview</h1>
+<button onclick="location.reload()">Обновить</button>
+
+<h2>Pipeline Progress</h2>
+<table>
+<tr><th>Feature</th><th>Status</th><th>Start</th><th>End</th></tr>
+<tbody id="progress-body"></tbody>
+</table>
+
+<h2>Agent Statistics</h2>
+<table>
+<tr>
+  <th>Agent</th>
+  <th>Calls</th>
+  <th>Auto-fixes</th>
+  <th>Successes</th>
+  <th>Failures</th>
+  <th>Avg time (s)</th>
+</tr>
+{% for s in stats %}
+<tr>
+  <td>{{ s.agent }}</td>
+  <td>{{ s.calls }}</td>
+  <td>{{ s.auto_fixes }}</td>
+  <td>{{ s.success }}</td>
+  <td>{{ s.fail }}</td>
+  <td>{{ s.avg_time if s.avg_time is not none else '' }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Pipeline Time</h2>
+<ul>
+  <li>Start: {{ metadata.start }}</li>
+  <li>End: {{ metadata.end }}</li>
+  <li>Generated: {{ metadata.generated }}</li>
+</ul>
+
+<h2>Reports</h2>
+<ul>
+{% for r in reports %}
+  <li><a href="{{ r }}">{{ r }}</a></li>
+{% endfor %}
+</ul>
+</body>
+</html>
