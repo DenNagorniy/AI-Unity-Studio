@@ -16,3 +16,9 @@ venv/
 .env
 *.env
 openai*.txt
+
+# Build artifacts
+Build/
+ci_reports/
+build-outputs-*.zip
+final_summary.md
