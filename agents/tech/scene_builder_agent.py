@@ -4,11 +4,14 @@ import json
 from pathlib import Path
 
 from utils.agent_journal import log_trace
+import agent_memory
 
 
 def run(input: dict) -> dict:
     """Generate a simple scene description tied to the generated script."""
 
+    if not input:
+        input = agent_memory.read("architecture") or {}
     script_path = input.get("path", "Generated/Helper.cs")
     scene_dir = Path("Assets/Scenes/Generated")
     scene_dir.mkdir(parents=True, exist_ok=True)
@@ -25,5 +28,6 @@ def run(input: dict) -> dict:
         "objects": scene_data["monobehaviours"],
     }
     log_trace("SceneBuilderAgent", "run", input, result)
+    agent_memory.write("scene", result)
     return result
 

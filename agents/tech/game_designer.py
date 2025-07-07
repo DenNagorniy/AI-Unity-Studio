@@ -3,6 +3,7 @@
 
 from utils.llm import ask_mistral
 from utils.agent_journal import log_trace
+import agent_memory
 
 
 def run(input: dict) -> dict:
@@ -19,5 +20,6 @@ def run(input: dict) -> dict:
     feature = ask_mistral(prompt)
     result = {"feature": feature or text}
     log_trace("GameDesignerAgent", "run", input, result)
+    agent_memory.write("feature_description", result)
     return result
 

@@ -5,10 +5,13 @@ from pathlib import Path
 
 import config
 from utils.agent_journal import log_trace
+import agent_memory
 
 
 def run(input: dict) -> dict:
     """Determine script path/namespace and ensure asmdef exists."""
+    if not input:
+        input = agent_memory.read("tasks") or agent_memory.read("feature_description") or {}
     feature = input.get("feature") or input.get("task") or (input.get("tasks") or [{}])[0].get("feature")
 
     if isinstance(feature, dict):
@@ -34,5 +37,6 @@ def run(input: dict) -> dict:
         "asmdef": asmdef_file.stem,
     }
     log_trace("ArchitectAgent", "run", input, result)
+    agent_memory.write("architecture", result)
     return result
 

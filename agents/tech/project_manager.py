@@ -5,6 +5,7 @@ import json
 
 from utils.llm import ask_mistral
 from utils.agent_journal import log_trace
+import agent_memory
 
 
 def run(feature: dict) -> dict:
@@ -14,6 +15,8 @@ def run(feature: dict) -> dict:
     Returns:
         {"tasks": [ { "feature": <текст>, "acceptance": ["Compiles"] } ]}
     """
+    if not feature:
+        feature = agent_memory.read("feature_description") or {}
     desc = feature.get("feature", "")
     prompt = (
         "Create 3 short development tasks to implement the following Unity feature. "
@@ -26,10 +29,12 @@ def run(feature: dict) -> dict:
         if isinstance(tasks, list):
             result = {"tasks": tasks}
             log_trace("ProjectManagerAgent", "run", feature, result)
+            agent_memory.write("tasks", result)
             return result
     except json.JSONDecodeError:
         pass
     result = {"tasks": [{"feature": desc, "acceptance": ["Compiles"]}]}
     log_trace("ProjectManagerAgent", "run", feature, result)
+    agent_memory.write("tasks", result)
     return result
 
