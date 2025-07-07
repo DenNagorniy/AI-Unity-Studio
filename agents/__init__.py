@@ -6,3 +6,5 @@ project_manager = import_module("agents.tech.project_manager")
 coder = import_module("agents.tech.coder")
 tester = import_module("agents.tech.tester")
 team_lead = import_module("agents.tech.team_lead")
+
+creative_orchestrator = import_module("agents.creative.creative_orchestrator")

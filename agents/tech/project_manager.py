@@ -1,5 +1,8 @@
 # agents/tech/project_manager.py
-"""Stub project manager that converts feature to a single task list."""
+"""Plan tasks for a feature using local LLM."""
+
+import json
+from utils.llm import ask_mistral
 
 
 def run(feature: dict) -> dict:
@@ -9,4 +12,17 @@ def run(feature: dict) -> dict:
     Returns:
         {"tasks": [ { "feature": <текст>, "acceptance": ["Compiles"] } ]}
     """
-    return {"tasks": [{"feature": feature["feature"], "acceptance": ["Compiles"]}]}
+    desc = feature.get("feature", "")
+    prompt = (
+        "Create 3 short development tasks to implement the following Unity feature. "
+        'Respond with JSON in the form {"tasks": [{"feature": str, "acceptance": [str]}]}\n' + desc
+    )
+    reply = ask_mistral(prompt)
+    try:
+        data = json.loads(reply)
+        tasks = data.get("tasks")
+        if isinstance(tasks, list):
+            return {"tasks": tasks}
+    except json.JSONDecodeError:
+        pass
+    return {"tasks": [{"feature": desc, "acceptance": ["Compiles"]}]}

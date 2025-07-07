@@ -1,5 +1,7 @@
 # agents/tech/game_designer.py
-"""Stub agent to convert text prompt into feature description."""
+"""Generate short feature description using local LLM."""
+
+from utils.llm import ask_mistral
 
 
 def run(input: dict) -> dict:
@@ -10,4 +12,8 @@ def run(input: dict) -> dict:
         dict: {"feature": <короткое описание>}
     """
     text = input.get("text", "").strip()
-    return {"feature": text or "stub feature"}
+    if not text:
+        return {"feature": "stub feature"}
+    prompt = "Summarise the following game feature idea in one short sentence:\n" + text
+    feature = ask_mistral(prompt)
+    return {"feature": feature or text}

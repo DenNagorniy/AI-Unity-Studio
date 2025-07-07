@@ -11,6 +11,7 @@ from agents.tech import (
     refactor_agent,
     team_lead,
 )
+from agents.creative import creative_orchestrator
 from utils import apply_patch
 from utils.dotnet_tools import run_dotnet_build
 import config
@@ -18,6 +19,9 @@ import config
 
 def main(text: str):
     team_lead.log("🚀 Start AI pipeline")
+
+    creative_spec = creative_orchestrator.run({"text": text})
+    team_lead.log(f"🎭 Creative spec: {json.dumps(creative_spec, ensure_ascii=False)}")
 
     feature = game_designer.run({"text": text})
     team_lead.log(f"🎮 Feature: {json.dumps(feature, ensure_ascii=False)}")

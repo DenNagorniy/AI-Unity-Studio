@@ -39,7 +39,11 @@ def validate():
 
     try:
         data = json.loads(PM_PATH.read_text(encoding="utf-8"))
-        ProjectMap.model_validate(data, strict=True)  # pydantic v2
+        # Compatible validation for both pydantic v1 and v2
+        if hasattr(ProjectMap, "model_validate"):
+            ProjectMap.model_validate(data, strict=True)
+        else:
+            ProjectMap.parse_obj(data)
         click.secho("[OK] project_map.json is valid", fg="green")
         sys.exit(0)
     except (json.JSONDecodeError, ValidationError) as err:
