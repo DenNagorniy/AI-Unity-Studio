@@ -24,6 +24,7 @@ def _render(
     feedback: str,
     meta: str = "",
     self_improvement: str = "",
+    self_monitor: str = "",
 ) -> str:
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
     template = env.get_template(TEMPLATE_NAME)
@@ -35,6 +36,7 @@ def _render(
         feedback=feedback,
         meta=meta,
         self_improvement=self_improvement,
+        self_monitor=self_monitor,
     )
 
 
@@ -44,24 +46,25 @@ def generate_summary(
     feedback: str = "",
     meta_insights: str = "",
     self_improvement: str = "",
+    self_monitor: str = "",
     out_dir: str = "ci_reports",
 ) -> Path:
     """Create summary.html from given data."""
     metadata = {
         "date": datetime.utcnow().isoformat(),
-        "git_commit": subprocess.check_output([
-            "git",
-            "rev-parse",
-            "HEAD",
-        ]).decode().strip(),
+        "git_commit": subprocess.check_output(
+            [
+                "git",
+                "rev-parse",
+                "HEAD",
+            ]
+        )
+        .decode()
+        .strip(),
         "user": os.getenv("USER", "unknown"),
     }
     changelog_path = Path("CHANGELOG.md")
-    changelog = (
-        changelog_path.read_text(encoding="utf-8")
-        if changelog_path.exists()
-        else ""
-    )
+    changelog = changelog_path.read_text(encoding="utf-8") if changelog_path.exists() else ""
 
     asset_report = Path(out_dir) / "assets_report.html"
     if asset_report.exists():
@@ -75,6 +78,7 @@ def generate_summary(
         feedback,
         meta_insights,
         self_improvement,
+        self_monitor,
     )
     out_directory = Path(out_dir)
     out_directory.mkdir(exist_ok=True)
@@ -89,12 +93,14 @@ def main() -> None:
     feedback = os.getenv("SUMMARY_FEEDBACK", "")
     meta = os.getenv("SUMMARY_META", "")
     self_imp = os.getenv("SUMMARY_SELF", "")
+    self_mon = os.getenv("SUMMARY_MONITOR", "")
     path = generate_summary(
         urls,
         agents,
         feedback,
         meta_insights=meta,
         self_improvement=self_imp,
+        self_monitor=self_mon,
     )
     print(path)
 
