@@ -48,14 +48,24 @@ class Handler(BaseHTTPRequestHandler):
             for p in REPORTS_DIR.iterdir():
                 if p.suffix in {".zip", ".apk"}:
                     artifacts.append(str(p))
-        summary = str(REPORTS_DIR / "summary.html") if (REPORTS_DIR / "summary.html").exists() else ""
-        changelog = str(Path("CHANGELOG.md")) if Path("CHANGELOG.md").exists() else ""
-        return {"artifacts": artifacts, "summary": summary, "changelog": changelog}
+        summary = str(REPORTS_DIR / "summary.html")
+        changelog_path = Path("CHANGELOG.md")
+        changelog = (
+            changelog_path.read_text(encoding="utf-8")
+            if changelog_path.exists()
+            else ""
+        )
+        return {
+            "artifacts": artifacts,
+            "summary": summary,
+            "changelog": changelog,
+        }
 
 
 def run(server_address: tuple[str, int] = ("", PORT)) -> None:
     httpd = HTTPServer(server_address, Handler)
-    print(f"CI monitor running on http://{server_address[0] or 'localhost'}:{server_address[1]}")
+    host = server_address[0] or "localhost"
+    print(f"CI monitor running on http://{host}:{server_address[1]}")
     httpd.serve_forever()
 
 

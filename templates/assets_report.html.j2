@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Assets QC Report</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 4px 8px; }
+  .ok { background-color: #c8e6c9; }
+  .warning { background-color: #fff9c4; }
+  .error { background-color: #ffcdd2; }
+</style>
+</head>
+<body>
+<h1>Assets QC Report</h1>
+<table>
+<tr>
+  <th>Имя ассета</th>
+  <th>Путь</th>
+  <th>Количество полигонов</th>
+  <th>Макс. размер текстуры</th>
+  <th>QC статус</th>
+</tr>
+{% for a in assets %}
+<tr class="{{ a.status|lower }}">
+  <td>{{ a.name }}</td>
+  <td>{{ a.path }}</td>
+  <td>{{ a.polygons }}</td>
+  <td>{{ a.texture }}</td>
+  <td>{{ a.status }}</td>
+</tr>
+{% endfor %}
+</table>
+<h2>Metadata</h2>
+<ul>
+  <li>Дата: {{ metadata.date }}</li>
+  <li>Commit: {{ metadata.git_commit }}</li>
+  <li>Пользователь: {{ metadata.user }}</li>
+</ul>
+</body>
+</html>

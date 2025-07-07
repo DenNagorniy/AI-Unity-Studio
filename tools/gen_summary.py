@@ -79,11 +79,24 @@ def generate_summary(
     """Create summary.html from given data."""
     metadata = {
         "date": datetime.utcnow().isoformat(),
-        "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip(),
+        "git_commit": subprocess.check_output([
+            "git",
+            "rev-parse",
+            "HEAD",
+        ]).decode().strip(),
         "user": os.getenv("USER", "unknown"),
     }
     changelog_path = Path("CHANGELOG.md")
-    changelog = changelog_path.read_text(encoding="utf-8") if changelog_path.exists() else ""
+    changelog = (
+        changelog_path.read_text(encoding="utf-8")
+        if changelog_path.exists()
+        else ""
+    )
+
+    asset_report = Path(out_dir) / "assets_report.html"
+    if asset_report.exists():
+        artifact_urls = list(artifact_urls) + [asset_report.as_posix()]
+
     html = _render(artifact_urls, agent_results, metadata, changelog)
     out_directory = Path(out_dir)
     out_directory.mkdir(exist_ok=True)
