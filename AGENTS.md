@@ -56,3 +56,16 @@
 ## Current Milestone
 
 v1.0 released
+
+## Tasks
+- [ ] Улучшить логи пайплайна и детализировать ошибки
+- [ ] Ввести fallback-билды (WebGL -> Android)
+- [ ] Подключить GitHub Issues или Jira
+- [ ] Настроить автоматическую публикацию билдов
+- [ ] Перевести CI на GitHub Actions/GitLab CI
+- [ ] Поддержать Desktop и iOS сборки
+- [ ] Развить SceneBuilderAgent для генерации сцен
+- [ ] Реализовать mini feature pack
+- [ ] Создать веб-dashboard и REST API
+- [ ] Подготовить распределённую работу агентов
+- [ ] Сделать web-интерфейс и плагин Unity Editor
