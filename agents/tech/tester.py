@@ -18,7 +18,7 @@ def run_unity_tests(project_path: str) -> dict:
         result_file = f"results_{platform}.xml"
         proc = subprocess.run(
             [
-                "unity",
+                config.UNITY_CLI,
                 "-batchmode",
                 "-runTests",
                 "-projectPath",
@@ -27,6 +27,7 @@ def run_unity_tests(project_path: str) -> dict:
                 result_file,
                 "-testPlatform",
                 platform,
+                "-quit",
             ],
             capture_output=True,
             text=True,
@@ -87,7 +88,11 @@ def tester(task_spec) -> dict:
     total_passed = sum(r["passed"] for r in results.values())
     total_failed = sum(r["failed"] for r in results.values())
 
-    team_lead.update_project_map(task_spec.get("feature", "unknown"), total_failed == 0)
+    team_lead.update_project_map(
+        task_spec.get("feature", "unknown"),
+        [task_spec["path"]] if task_spec.get("path") else [],
+        total_failed == 0,
+    )
 
     return {
         "passed": total_passed,
