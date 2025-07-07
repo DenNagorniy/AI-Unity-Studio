@@ -101,5 +101,10 @@ def tester(task_spec) -> dict:
     }
 
 
+def run(task_spec) -> dict:
+    """Public wrapper used by the orchestrator."""
+    return tester(task_spec)
+
+
 if __name__ == "__main__":
     print(json.dumps(tester({}), indent=2, ensure_ascii=False))
