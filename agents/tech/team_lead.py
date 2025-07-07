@@ -5,7 +5,6 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-
 PM_PATH = Path("project_map.json")
 JOURNAL_PATH = Path("journal.json")
 METRICS_PATH = Path("metrics.json")

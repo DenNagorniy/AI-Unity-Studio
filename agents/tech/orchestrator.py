@@ -1,20 +1,21 @@
-import sys
 import json
+import sys
+
+import config
+from agents.creative import creative_orchestrator
 from agents.tech import (
+    architect_agent,
+    build_agent,
+    coder,
     game_designer,
     project_manager,
-    architect_agent,
-    coder,
-    scene_builder_agent,
-    build_agent,
-    tester,
     refactor_agent,
+    scene_builder_agent,
     team_lead,
+    tester,
 )
-from agents.creative import creative_orchestrator
 from utils import apply_patch
 from utils.dotnet_tools import run_dotnet_build
-import config
 
 
 def main(text: str):

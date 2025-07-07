@@ -1,8 +1,9 @@
 import json
-import sys
 import pathlib
-import click
+import sys
 from typing import Dict
+
+import click
 from pydantic import BaseModel, Field, ValidationError
 
 

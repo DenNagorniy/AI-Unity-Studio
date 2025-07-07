@@ -1,10 +1,11 @@
-import sys
 import json
-from agents.task_manager import task_manager
+import sys
+
 from agents.coder import coder
+from agents.task_manager import task_manager
 from agents.tester import tester
-from utils.apply_patch import apply_patch
 from config import PROJECT_PATH
+from utils.apply_patch import apply_patch
 
 
 def ask_multiline() -> str:

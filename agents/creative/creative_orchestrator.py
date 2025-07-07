@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
-from . import game_designer, narrative_designer, lore_keeper, art_mood
+
+from . import art_mood, game_designer, lore_keeper, narrative_designer
 
 
 def run(input: dict) -> dict:
