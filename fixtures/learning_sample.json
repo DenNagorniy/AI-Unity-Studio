@@ -1,0 +1,16 @@
+{
+  "CoderAgent": [
+    {"hash": "a1", "result": "success"},
+    {"hash": "a1", "result": "success"},
+    {"hash": "a1", "result": "success"}
+  ],
+  "TesterAgent": [
+    {"hash": "t1", "result": "success"},
+    {"hash": "t2", "result": "success"}
+  ],
+  "ReviewAgent": [
+    {"hash": "r1", "result": "success"},
+    {"hash": "r1", "result": "success"},
+    {"hash": "r1", "result": "success"}
+  ]
+}
