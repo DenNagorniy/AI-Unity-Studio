@@ -14,6 +14,19 @@
 Запрос → GameDesignerAgent → ProjectManagerAgent → ArchitectAgent →  
 SceneBuilderAgent / CoderAgent → TesterAgent → BuildAgent → TeamLeadAgent → журналирование
 
+## Агенты
+| Агент | Краткая роль |
+|-------|--------------|
+| GameDesignerAgent | формирует фичу |
+| ProjectManagerAgent | планирование задач |
+| ArchitectAgent | структура кода |
+| SceneBuilderAgent | сцены и префабы |
+| CoderAgent | C# код |
+| TesterAgent | тесты |
+| BuildAgent | сборка |
+| TeamLeadAgent | логирование |
+| AssetCrafter (v1.1) | генерация ассетов |
+
 ## ⚙ Минимальный стек
 | Технология      | Версия       | Назначение                     |
 |-----------------|-------------|--------------------------------|
@@ -28,10 +41,10 @@ SceneBuilderAgent / CoderAgent → TesterAgent → BuildAgent → TeamLeadAgent 
 ```bash
 pip install -r requirements.txt
 cp .env.example .env  # Указать свои пути в .env
-python run_all.py  # полный цикл: пайплайн + тесты + билд
+python run_all.py  # полный цикл: пайплайн + тесты + билд + ассеты
 ```
 
-Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → Build → TeamLead.
+Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → Build → AssetCrafter → TeamLead.
 
 Для запуска всего процесса и сохранения CI отчётов используйте `run_all.py`.
 

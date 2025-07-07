@@ -16,8 +16,7 @@ from run_pipeline import main as pipeline_main
 from tools.gen_changelog import main as gen_changelog
 from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
-from utils.asset_catalog import catalog_assets
-from utils.asset_qc import run_qc
+import ci_assets
 
 
 def main() -> None:
@@ -43,8 +42,7 @@ def main() -> None:
         print(f"Publish failed: {e}")
 
     try:
-        run_qc()
-        catalog_assets()
+        ci_assets.main()
     except Exception as e:  # noqa: PERF203
         print(f"Asset pipeline failed: {e}")
 

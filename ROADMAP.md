@@ -15,6 +15,9 @@
 - Desktop build (Windows/Mac)
 - Предварительная подготовка iOS сборки
 
+### Asset pipeline
+- AssetCrafter agent integrated for asset generation pipeline
+
 ## v1.2 — Feature Expansion
 
 ### Творческий пайплайн
