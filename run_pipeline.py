@@ -1,13 +1,13 @@
+import argparse
 import json
 import sys
 from pathlib import Path
-import argparse
 
 import agent_memory
-
 from agents.tech import architect_agent, build_agent, coder, game_designer, refactor_agent, review_agent, tester
 from agents.tech.project_manager import run as task_manager
 from agents.tech.tester import run as run_tests
+from auto_fix import auto_fix
 from dashboard import main as show_dashboard
 from utils.agent_journal import log_action
 from utils.apply_patch import apply_patch
@@ -62,9 +62,15 @@ def main(agents: list[str] | None = None, use_memory: bool = False):
 
     # 3. Код
     if not agents or "CoderAgent" in agents:
-        patch = coder.run(arch)
-        log_action("CoderAgent", "patch generated")
-        apply_patch(patch)
+        try:
+            patch = coder.run(arch)
+            log_action("CoderAgent", "patch generated")
+            apply_patch(patch)
+        except Exception as e:  # noqa: PERF203
+            auto_fix(feature.get("feature", ""), "CoderAgent", str(e))
+            patch = coder.run(arch)
+            log_action("CoderAgent", "patch generated")
+            apply_patch(patch)
 
     # 3. Тесты Unity CLI
     if not agents or "TesterAgent" in agents:
@@ -77,7 +83,13 @@ def main(agents: list[str] | None = None, use_memory: bool = False):
 
     # 5. Тесты
     if not agents or "TesterAgent" in agents:
-        report = tester.run(arch)
+        try:
+            report = tester.run(arch)
+            if report["failed"]:
+                raise RuntimeError("tests failed")
+        except Exception as e:  # noqa: PERF203
+            auto_fix(feature.get("feature", ""), "TesterAgent", str(e))
+            report = tester.run(arch)
         log_action("TesterAgent", f"passed={report['passed']} failed={report['failed']}")
         if report["failed"]:
             update_feature("FT-unknown", feature.get("feature", ""), "failed")
@@ -86,7 +98,11 @@ def main(agents: list[str] | None = None, use_memory: bool = False):
 
     # 6. Сборка
     if not agents or "BuildAgent" in agents:
-        build_info = build_agent.run({"target": "WebGL"})
+        try:
+            build_info = build_agent.run({"target": "WebGL"})
+        except Exception as e:  # noqa: PERF203
+            auto_fix(feature.get("feature", ""), "BuildAgent", str(e))
+            build_info = build_agent.run({"target": "WebGL"})
         log_action("BuildAgent", build_info.get("status", ""))
 
     # 7. Refactor
@@ -111,4 +127,3 @@ if __name__ == "__main__":
     parser.add_argument("--agents", nargs="*", help="Subset of agents to run")
     args = parser.parse_args()
     main(args.agents, use_memory=args.use_memory)
-
