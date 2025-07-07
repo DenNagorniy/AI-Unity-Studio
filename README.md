@@ -13,7 +13,7 @@
 
 ## 💡 Поток данных
 Запрос → GameDesignerAgent → ProjectManagerAgent → ArchitectAgent →
-SceneBuilderAgent / CoderAgent → TesterAgent → FeatureInspectorAgent → LoreValidatorAgent → BuildAgent → TeamLeadAgent → журналирование
+SceneBuilderAgent / CoderAgent → TesterAgent → FeatureInspectorAgent → LoreValidatorAgent → BuildAgent → AI Review Panel → TeamLeadAgent → журналирование
 
 ## Агенты
 | Агент | Краткая роль |
