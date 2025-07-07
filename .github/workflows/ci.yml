@@ -10,6 +10,12 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    env:
+      PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
+      UNITY_CLI: ${{ secrets.UNITY_CLI }}
+      UNITY_SCRIPTS_PATH: ${{ secrets.UNITY_SCRIPTS_PATH }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -23,11 +29,6 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '8.0.x'
-
-    - name: Load .env variables
-      uses: c-py/action-dotenv-to-setenv@v2
-      with:
-        env-file: '.env'
 
     - name: Install Python dependencies
       run: |
@@ -46,11 +47,7 @@ jobs:
     - name: dotnet build
       run: |
         if [ -z "$PROJECT_PATH" ]; then
-          echo "❌ PROJECT_PATH is not set. Please define it in .env or as a secret."
-          exit 1
-        fi
-        if [ ! -f "$PROJECT_PATH" ]; then
-          echo "❌ PROJECT_PATH points to a file that does not exist: $PROJECT_PATH"
+          echo "❌ PROJECT_PATH is not set. Please configure GitHub secret PROJECT_PATH."
           exit 1
         fi
         echo "🚀 Building project at $PROJECT_PATH"
@@ -61,34 +58,31 @@ jobs:
 
     - name: dotnet tests with coverage
       run: |
-        if [ -z "$PROJECT_PATH" ] || [ ! -f "$PROJECT_PATH" ]; then
-          echo "⚠ PROJECT_PATH is not set or does not exist. Skipping dotnet tests."
-        else
+        if [ -f "$PROJECT_PATH" ]; then
           dotnet test "$PROJECT_PATH" --collect "XPlat Code Coverage"
+        else
+          echo "⚠ Skipping dotnet tests — PROJECT_PATH does not exist: $PROJECT_PATH"
         fi
 
     - name: Unity tests
       run: |
-        if [ -z "$UNITY_CLI" ]; then
-          echo "⚠ UNITY_CLI is not set. Skipping Unity tests."
+        if [ -x "$UNITY_CLI" ]; then
+          "$UNITY_CLI" -batchmode -runTests -projectPath . -testResults results.xml
         else
-          $UNITY_CLI -batchmode -runTests -projectPath . -testResults results.xml
+          echo "⚠ Skipping Unity tests — UNITY_CLI does not exist: $UNITY_CLI"
         fi
 
     - uses: actions/upload-artifact@v4
       with:
         name: build-log
         path: build.log
-        if-no-files-found: ignore
 
     - uses: actions/upload-artifact@v4
       with:
         name: unity-test-results
         path: results.xml
-        if-no-files-found: ignore
 
     - uses: actions/upload-artifact@v4
       with:
         name: coverage
         path: '**/coverage.cobertura.xml'
-        if-no-files-found: ignore
