@@ -9,59 +9,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterable
 
-from jinja2 import Environment
+from jinja2 import Environment, FileSystemLoader
 
-TEMPLATE = """<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Pipeline Summary</title>
-<style>
-  body { font-family: Arial, sans-serif; }
-  table { border-collapse: collapse; }
-  th, td { border: 1px solid #ccc; padding: 4px 8px; }
-</style>
-</head>
-<body>
-<h1>Pipeline Summary</h1>
-
-<h2>Artifacts</h2>
-<ul>
-{% for url in artifact_urls %}
-  <li><a href="{{ url }}">{{ url }}</a></li>
-{% endfor %}
-</ul>
-
-<h2>Changelog</h2>
-<pre>{{ changelog }}</pre>
-
-<h2>Agent Results</h2>
-<table>
-<tr><th>Agent</th><th>Result</th></tr>
-{% for name, result in agent_results.items() %}
-<tr><td>{{ name }}</td><td>{{ result }}</td></tr>
-{% endfor %}
-</table>
-
-<h2>Lore Validation</h2>
-<p>Status: {{ agent_results.get('LoreValidatorAgent', 'n/a') }}</p>
-
-<h2>User Feedback</h2>
-<pre>{{ feedback }}</pre>
-
-<h2>Meta Insights</h2>
-<pre>{{ meta }}</pre>
-
-<h2>Metadata</h2>
-<ul>
-  <li>Date: {{ metadata.date }}</li>
-  <li>Commit: {{ metadata.git_commit }}</li>
-  <li>User: {{ metadata.user }}</li>
-</ul>
-
-</body>
-</html>
-"""
+ROOT_DIR = Path(__file__).resolve().parent.parent
+TEMPLATE_DIR = ROOT_DIR / "templates"
+TEMPLATE_NAME = "summary.html.j2"
 
 
 def _render(
@@ -71,9 +23,10 @@ def _render(
     changelog: str,
     feedback: str,
     meta: str = "",
+    self_improvement: str = "",
 ) -> str:
-    env = Environment()
-    template = env.from_string(TEMPLATE)
+    env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
+    template = env.get_template(TEMPLATE_NAME)
     return template.render(
         artifact_urls=list(artifact_urls),
         agent_results=agent_results,
@@ -81,6 +34,7 @@ def _render(
         changelog=changelog,
         feedback=feedback,
         meta=meta,
+        self_improvement=self_improvement,
     )
 
 
@@ -89,6 +43,7 @@ def generate_summary(
     agent_results: dict[str, str],
     feedback: str = "",
     meta_insights: str = "",
+    self_improvement: str = "",
     out_dir: str = "ci_reports",
 ) -> Path:
     """Create summary.html from given data."""
@@ -113,7 +68,13 @@ def generate_summary(
         artifact_urls = list(artifact_urls) + [asset_report.as_posix()]
 
     html = _render(
-        artifact_urls, agent_results, metadata, changelog, feedback, meta_insights
+        artifact_urls,
+        agent_results,
+        metadata,
+        changelog,
+        feedback,
+        meta_insights,
+        self_improvement,
     )
     out_directory = Path(out_dir)
     out_directory.mkdir(exist_ok=True)
@@ -127,7 +88,14 @@ def main() -> None:
     agents = json.loads(os.getenv("SUMMARY_AGENTS", "{}"))
     feedback = os.getenv("SUMMARY_FEEDBACK", "")
     meta = os.getenv("SUMMARY_META", "")
-    path = generate_summary(urls, agents, feedback, meta_insights=meta)
+    self_imp = os.getenv("SUMMARY_SELF", "")
+    path = generate_summary(
+        urls,
+        agents,
+        feedback,
+        meta_insights=meta,
+        self_improvement=self_imp,
+    )
     print(path)
 
 

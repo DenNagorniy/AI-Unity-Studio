@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pipeline Summary</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    table { border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; }
+  </style>
+</head>
+<body>
+<h1>Pipeline Summary</h1>
+
+<h2>Artifacts</h2>
+<ul>
+{% for url in artifact_urls %}
+  <li><a href="{{ url }}">{{ url }}</a></li>
+{% endfor %}
+</ul>
+
+<h2>Changelog</h2>
+<pre>{{ changelog }}</pre>
+
+<h2>Agent Results</h2>
+<table>
+<tr><th>Agent</th><th>Result</th></tr>
+{% for name, result in agent_results.items() %}
+<tr><td>{{ name }}</td><td>{{ result }}</td></tr>
+{% endfor %}
+</table>
+
+<h2>Lore Validation</h2>
+<p>Status: {{ agent_results.get('LoreValidatorAgent', 'n/a') }}</p>
+
+<h2>User Feedback</h2>
+<pre>{{ feedback }}</pre>
+
+<h2>Meta Insights</h2>
+<pre>{{ meta }}</pre>
+
+<details>
+  <summary>Self-Improvement Suggestions</summary>
+  <pre>{{ self_improvement }}</pre>
+</details>
+
+<h2>Metadata</h2>
+<ul>
+  <li>Date: {{ metadata.date }}</li>
+  <li>Commit: {{ metadata.git_commit }}</li>
+  <li>User: {{ metadata.user }}</li>
+</ul>
+</body>
+</html>

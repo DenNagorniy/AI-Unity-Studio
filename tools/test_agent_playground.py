@@ -16,4 +16,3 @@ def test_run_agent(monkeypatch):
     monkeypatch.setitem(sys.modules, "agents.tech.simple", module)
     result = ap.run_agent("Simple", {"a": 1})
     assert result["res"] == 1
-

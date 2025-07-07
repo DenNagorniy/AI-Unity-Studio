@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))  # noqa: E402
 
-from meta_agent import MetaAgent
+from meta_agent import MetaAgent  # noqa: E402
 
 
 def test_meta_agent(tmp_path, monkeypatch):

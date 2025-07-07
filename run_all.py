@@ -33,6 +33,7 @@ from tools.gen_ci_overview import generate_ci_overview
 from tools.gen_multifeature_summary import generate_multifeature_summary
 from tools.gen_summary import generate_summary
 from meta_agent import MetaAgent
+from agents.analytics import self_improver
 from utils.agent_journal import read_entries
 from utils.backup_manager import restore_backup, save_backup
 from utils.pipeline_config import load_config
@@ -245,11 +246,24 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
         meta_text = Path(meta_result["report"]).read_text(encoding="utf-8")
     except Exception:
         pass
+    self_text = ""
+    self_path = ""
+    try:
+        self_result = self_improver.run({"out_dir": str(reports)})
+        self_path = self_result.get("report", "")
+        if self_path:
+            self_text = Path(self_path).read_text(encoding="utf-8")
+    except Exception:
+        pass
+    if self_path:
+        with open("final_summary.md", "a", encoding="utf-8") as f:
+            f.write(f"SELF_IMPROVEMENT: {Path(self_path).resolve()}\n")
     summary_path = generate_summary(
         urls,
         agent_results,
         feedback_text,
         meta_insights=meta_text,
+        self_improvement=self_text,
         out_dir=str(reports),
     )
     print(f"Summary HTML: {summary_path}")

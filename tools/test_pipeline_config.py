@@ -16,4 +16,3 @@ def test_load_custom(tmp_path, monkeypatch):
     cfg = pipeline_config.load_config()
     assert cfg["steps"]["build"] is False
     assert cfg["steps"]["qc"] is False
-
