@@ -34,5 +34,8 @@ python -m agents.tech.orchestrator "Hello world feature"
 Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → Build → TeamLead.
 
 ## Лицензия
-Проект распространяется под лицензией MIT. См. файл [LICENSE](LICENSE) для подробностей.
+
+```makefile
+License: Proprietary — All Rights Reserved
+```
 
