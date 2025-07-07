@@ -27,6 +27,7 @@ from tools.gen_ci_overview import generate_ci_overview
 from tools.gen_multifeature_summary import generate_multifeature_summary
 from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
+from utils.backup_manager import restore_backup, save_backup
 from utils.pipeline_config import load_config
 
 STATUS_PATH = Path("pipeline_status.json")
@@ -194,6 +195,9 @@ def _run_feature(name: str, prompt: str, optimize: bool) -> dict:
     os.environ["CI_REPORTS_DIR"] = str(feature_dir)
     feature_dir.mkdir(parents=True, exist_ok=True)
 
+    # Save backup of workspace before running the pipeline
+    save_backup(name, ".")
+
     orig_ask = run_pipeline.ask_multiline
     run_pipeline.ask_multiline = lambda: prompt
 
@@ -207,6 +211,8 @@ def _run_feature(name: str, prompt: str, optimize: bool) -> dict:
         status = "error"
         results = {}
         summary = feature_dir / "summary.html"
+        # Restore previous state if pipeline failed
+        restore_backup(name, ".")
     finally:
         run_pipeline.ask_multiline = orig_ask
         if old_dir is None:
