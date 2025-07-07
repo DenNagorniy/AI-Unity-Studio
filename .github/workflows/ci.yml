@@ -24,16 +24,15 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    - name: Load .env variables
+      uses: c-py/action-dotenv-to-setenv@v2
+      with:
+        env-file: '.env'
+
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install python-dotenv
-
-    - name: Load environment variables
-      run: |
-        echo "PROJECT_PATH=${PROJECT_PATH}" >> $GITHUB_ENV
-        echo "UNITY_CLI=${UNITY_CLI}" >> $GITHUB_ENV
 
     - name: Lint Python code
       run: |
@@ -47,12 +46,12 @@ jobs:
     - name: dotnet build
       run: |
         if [ -z "$PROJECT_PATH" ]; then
-          echo "❌ PROJECT_PATH is not set"
+          echo "❌ PROJECT_PATH is not set. Please define it in .env or as a secret."
           exit 1
         fi
-        if [ ! -e "$PROJECT_PATH" ]; then
-          echo "⚠ PROJECT_PATH '$PROJECT_PATH' does not exist, skipping dotnet build"
-          exit 0
+        if [ ! -f "$PROJECT_PATH" ]; then
+          echo "❌ PROJECT_PATH points to a file that does not exist: $PROJECT_PATH"
+          exit 1
         fi
         echo "🚀 Building project at $PROJECT_PATH"
         dotnet build "$PROJECT_PATH"
@@ -62,20 +61,16 @@ jobs:
 
     - name: dotnet tests with coverage
       run: |
-        if [ -z "$PROJECT_PATH" ]; then
-          echo "❌ PROJECT_PATH is not set"
-          exit 1
+        if [ -z "$PROJECT_PATH" ] || [ ! -f "$PROJECT_PATH" ]; then
+          echo "⚠ PROJECT_PATH is not set or does not exist. Skipping dotnet tests."
+        else
+          dotnet test "$PROJECT_PATH" --collect "XPlat Code Coverage"
         fi
-        if [ ! -e "$PROJECT_PATH" ]; then
-          echo "⚠ PROJECT_PATH '$PROJECT_PATH' does not exist, skipping dotnet tests"
-          exit 0
-        fi
-        dotnet test "$PROJECT_PATH" --collect "XPlat Code Coverage"
 
     - name: Unity tests
       run: |
         if [ -z "$UNITY_CLI" ]; then
-          echo "⚠ UNITY_CLI is not set, skipping Unity tests"
+          echo "⚠ UNITY_CLI is not set. Skipping Unity tests."
         else
           $UNITY_CLI -batchmode -runTests -projectPath . -testResults results.xml
         fi
@@ -84,13 +79,16 @@ jobs:
       with:
         name: build-log
         path: build.log
+        if-no-files-found: ignore
 
     - uses: actions/upload-artifact@v4
       with:
         name: unity-test-results
         path: results.xml
+        if-no-files-found: ignore
 
     - uses: actions/upload-artifact@v4
       with:
         name: coverage
         path: '**/coverage.cobertura.xml'
+        if-no-files-found: ignore
