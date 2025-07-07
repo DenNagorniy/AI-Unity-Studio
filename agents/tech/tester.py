@@ -2,14 +2,58 @@ from __future__ import annotations
 
 import json
 import subprocess
-import tempfile
-import textwrap
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import config
 
 from . import team_lead
+
+
+def run_unity_tests(project_path: str) -> dict:
+    """Run Unity EditMode and PlayMode tests and write metrics.json."""
+    results: dict[str, dict[str, int]] = {}
+
+    for platform in ["EditMode", "PlayMode"]:
+        result_file = f"results_{platform}.xml"
+        proc = subprocess.run(
+            [
+                "unity",
+                "-batchmode",
+                "-runTests",
+                "-projectPath",
+                project_path,
+                "-testResults",
+                result_file,
+                "-testPlatform",
+                platform,
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        print(proc.stdout)
+        print(proc.stderr)
+
+        tree = ET.parse(result_file)
+        root = tree.getroot()
+        passed = int(root.attrib.get("passed", 0))
+        failed = int(root.attrib.get("failed", 0))
+        skipped = int(root.attrib.get("skipped", 0))
+
+        results[platform] = {
+            "passed": passed,
+            "failed": failed,
+            "skipped": skipped,
+        }
+
+        if failed > 0:
+            raise RuntimeError(f"{platform} tests failed: {failed} failed")
+
+    with open("metrics.json", "w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2)
+
+    return results
 
 
 def _ensure_playmode_test(script_path: str | None) -> None:
@@ -34,73 +78,24 @@ def _ensure_playmode_test(script_path: str | None) -> None:
     test_file.write_text(content, encoding="utf-8")
 
 
-def _run_unity(project_path: str, unity_cli: str, xml_path: str, platform: str) -> subprocess.CompletedProcess:
-    cmd = [
-        unity_cli,
-        "-batchmode",
-        "-nographics",
-        "-projectPath",
-        project_path,
-        "-runTests",
-        "-testPlatform",
-        platform,
-        "-testResults",
-        xml_path,
-        "-quit",
-    ]
-    return subprocess.run(cmd, capture_output=True, text=True)
-
-
-def _parse_results(xml_file: Path):
-    if not xml_file.exists():
-        return 0, 0, "results.xml not generated"
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
-    passed = failed = 0
-    for tc in root.iter("test-case"):
-        if tc.attrib.get("result") == "Passed":
-            passed += 1
-        else:
-            failed += 1
-    return passed, failed, ""
-
-
 def tester(task_spec) -> dict:
-    unity_cli = config.UNITY_CLI
     project_path = config.PROJECT_PATH
     _ensure_playmode_test(task_spec.get("path"))
-    tmp_dir = tempfile.TemporaryDirectory()
-    xml_edit = Path(tmp_dir.name) / "edit_results.xml"
-    xml_play = Path(tmp_dir.name) / "play_results.xml"
 
-    proc_edit = _run_unity(project_path, unity_cli, str(xml_edit), "EditMode")
-    proc_play = _run_unity(project_path, unity_cli, str(xml_play), "PlayMode")
+    results = run_unity_tests(project_path)
 
-    p1, f1, extra1 = _parse_results(xml_edit)
-    p2, f2, extra2 = _parse_results(xml_play)
-    passed = p1 + p2
-    failed = f1 + f2
-    extra = f"{extra1}\n{extra2}".strip()
+    total_passed = sum(r["passed"] for r in results.values())
+    total_failed = sum(r["failed"] for r in results.values())
 
-    team_lead.update_project_map(task_spec.get("feature", "unknown"), failed == 0)
-
-    logs = textwrap.dedent(
-        f"""
-        EDIT STDOUT:
-        {proc_edit.stdout[:1000]}
-        ----
-        PLAY STDOUT:
-        {proc_play.stdout[:1000]}
-        ----
-        {extra}
-        """
-    ).strip()
+    team_lead.update_project_map(
+        task_spec.get("feature", "unknown"), total_failed == 0
+    )
 
     return {
-        "passed": passed,
-        "failed": failed,
-        "logs": logs,
-        "report_paths": [str(xml_edit), str(xml_play)],
+        "passed": total_passed,
+        "failed": total_failed,
+        "logs": "",
+        "report_paths": [f"results_{p}.xml" for p in results.keys()],
     }
 
 
