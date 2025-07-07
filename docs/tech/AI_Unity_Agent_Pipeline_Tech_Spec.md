@@ -28,8 +28,9 @@
 6️⃣ `CoderAgent` — C# + git-patch  
 7️⃣ `TesterAgent` — юнит + интеграционные тесты
 8️⃣ `FeatureInspectorAgent` — проверка фичи
-9️⃣ `BuildAgent` — билд WebGL/Android  
-🔟 `TeamLeadAgent` — журнал, метрики  
+9️⃣ `LoreValidatorAgent` — сверка с лором
+🔟 `BuildAgent` — билд WebGL/Android
+1️⃣1 `TeamLeadAgent` — журнал, метрики
 
 ## 📂 Артефакты
 - `project_map.json` — карта фич
@@ -52,6 +53,9 @@ python ci_assets.py  # генерирует ассеты из asset_requests.jso
 
 ## FeatureInspectorAgent
 FeatureInspectorAgent проверяет целостность сгенерированной фичи на основе `project_map.json`, `feature_index.json` и `asset_catalog.json`. Отчёт сохраняется в `ci_reports/<feature>/feature_inspection.md`. При ошибках в index добавляется метка `needs_fix`.
+
+## LoreValidatorAgent
+Проверяет совпадение новой фичи с базовым лором проекта. Читает тексты из каталога `lore/` и `lorebook.json`, сравнивает их с описанием и диалогами. Отчёт `lore_validation.md` кладётся в `ci_reports/<feature>/` и возвращает статус `LorePass` или `Mismatch`.
 
 ## Agent Collaboration Layer
 Память включается флагом `--use-memory` у `run_pipeline.py`. Данные

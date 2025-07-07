@@ -12,8 +12,8 @@
 - Интерактивный Playground для агентов `agent_playground.py`.
 
 ## 💡 Поток данных
-Запрос → GameDesignerAgent → ProjectManagerAgent → ArchitectAgent →  
-SceneBuilderAgent / CoderAgent → TesterAgent → FeatureInspectorAgent → BuildAgent → TeamLeadAgent → журналирование
+Запрос → GameDesignerAgent → ProjectManagerAgent → ArchitectAgent →
+SceneBuilderAgent / CoderAgent → TesterAgent → FeatureInspectorAgent → LoreValidatorAgent → BuildAgent → TeamLeadAgent → журналирование
 
 ## Агенты
 | Агент | Краткая роль |
@@ -46,7 +46,7 @@ python run_all.py  # полный цикл: пайплайн + тесты + би
 python run_all.py --optimize  # пропустить быстрые шаги по истории
 ```
 
-Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → FeatureInspector → Build → AssetCrafter → TeamLead.
+Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → FeatureInspector → LoreValidator → Build → AssetCrafter → TeamLead.
 
 Для запуска всего процесса и сохранения CI отчётов используйте `run_all.py`.
 

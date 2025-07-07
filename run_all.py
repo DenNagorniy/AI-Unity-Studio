@@ -16,6 +16,7 @@ import ci_assets
 import ci_build
 import ci_test
 from agents.tech import feature_inspector
+from agents.creative import lore_validator
 import run_pipeline
 from auto_escalation import main as run_escalation
 from ci_publish import _load_env
@@ -114,6 +115,25 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
 
     ci_test.main()
     insp_result = feature_inspector.run({"feature": feature_name, "out_dir": str(reports)})
+    desc = Path("core_loop.md").read_text(encoding="utf-8") if Path("core_loop.md").exists() else ""
+    catalog = {}
+    if Path("asset_catalog.json").exists():
+        try:
+            catalog = json.loads(Path("asset_catalog.json").read_text(encoding="utf-8"))
+        except Exception:
+            catalog = {}
+    dialogues = ""
+    narr_dir = Path("narrative_events")
+    if narr_dir.exists():
+        for p in narr_dir.glob("*.json"):
+            dialogues += p.read_text(encoding="utf-8") + "\n"
+    lore_result = lore_validator.run({
+        "feature": feature_name,
+        "description": desc,
+        "assets": catalog.get("assets", []),
+        "dialogues": dialogues,
+        "out_dir": str(reports),
+    })
     if cfg["steps"].get("build", True):
         ci_build.main()
 
@@ -152,6 +172,8 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     agent_results = {}
     insp_status = "success" if insp_result.get("verdict") == "Pass" else "error"
     agent_results["FeatureInspectorAgent"] = insp_status
+    lore_status = "success" if lore_result.get("status") == "LorePass" else "error"
+    agent_results["LoreValidatorAgent"] = lore_status
     try:
         test_data = json.loads((reports / "ci_test.json").read_text(encoding="utf-8"))
         build_data = json.loads((reports / "ci_build.json").read_text(encoding="utf-8"))
@@ -165,6 +187,7 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
             f"- Tests: {test_status}",
             f"- Build: {build_status}",
             f"- Feature Inspection: {insp_result['verdict']}",
+            f"- Lore Validation: {lore_result['status']}",
         ]
     except Exception:
         pass
