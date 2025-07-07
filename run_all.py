@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 import ci_assets
@@ -13,11 +14,13 @@ import ci_build
 import ci_test
 from ci_publish import _load_env
 from ci_publish import main as publish_main
+import yaml
 from notify import notify_all
 from pipeline_optimizer import suggest_optimizations
-from run_pipeline import main as pipeline_main
+import run_pipeline
 from tools.gen_changelog import main as gen_changelog
 from tools.gen_summary import generate_summary
+from tools.gen_multifeature_summary import generate_multifeature_summary
 from utils.agent_journal import read_entries
 from utils.pipeline_config import load_config
 
@@ -40,7 +43,7 @@ def _apply_skip(base: list[str], flags: list[str]) -> list[str]:
     return [a for a in base if a not in mapped]
 
 
-def main(optimize: bool = False) -> None:
+def run_once(optimize: bool = False) -> Path:
     """Execute full CI pipeline."""
     cfg = load_config()
 
@@ -54,7 +57,7 @@ def main(optimize: bool = False) -> None:
             print("⚠ Possible skips:", ", ".join(opt["warn_flags"]))
 
     if os.getenv("SKIP_PIPELINE") != "1":
-        pipeline_main(agents)
+        run_pipeline.main(agents)
 
     reports = Path(os.getenv("CI_REPORTS_DIR", "ci_reports"))
     reports.mkdir(exist_ok=True)
@@ -131,9 +134,70 @@ def main(optimize: bool = False) -> None:
 
     notify_all(str(summary_path), "CHANGELOG.md", urls)
 
+    return summary_path
+
+
+def _run_feature(name: str, prompt: str, optimize: bool) -> dict:
+    """Run pipeline for a single feature and return result info."""
+    base_reports = Path("ci_reports")
+    feature_dir = base_reports / name
+    old_dir = os.getenv("CI_REPORTS_DIR")
+    os.environ["CI_REPORTS_DIR"] = str(feature_dir)
+    feature_dir.mkdir(parents=True, exist_ok=True)
+
+    orig_ask = run_pipeline.ask_multiline
+    run_pipeline.ask_multiline = lambda: prompt
+
+    start = datetime.utcnow()
+    status = "success"
+    try:
+        summary = run_once(optimize)
+    except (SystemExit, Exception) as e:  # noqa: PERF203
+        print(f"Feature {name} failed: {e}")
+        status = "error"
+        summary = feature_dir / "summary.html"
+    finally:
+        run_pipeline.ask_multiline = orig_ask
+        if old_dir is None:
+            os.environ.pop("CI_REPORTS_DIR", None)
+        else:
+            os.environ["CI_REPORTS_DIR"] = old_dir
+
+    duration = round((datetime.utcnow() - start).total_seconds(), 2)
+    rel_summary = summary.relative_to(base_reports)
+    return {
+        "name": name,
+        "status": status,
+        "time": duration,
+        "summary": rel_summary.as_posix(),
+    }
+
+
+def main(optimize: bool = False, multi: str | None = None) -> None:
+    """Execute pipeline for one or multiple features."""
+    if not multi:
+        run_once(optimize)
+        return
+
+    data = yaml.safe_load(Path(multi).read_text(encoding="utf-8")) or {}
+    features = data.get("features", {})
+    if not isinstance(features, dict):
+        print("Invalid YAML format: expected 'features' mapping")
+        return
+
+    results = []
+    start_all = datetime.utcnow()
+    for fname, prompt in features.items():
+        print(f"\n=== {fname} ===")
+        results.append(_run_feature(fname, str(prompt), optimize))
+    total_time = round((datetime.utcnow() - start_all).total_seconds(), 2)
+    summary = generate_multifeature_summary("ci_reports", results, total_time)
+    print(f"Multi summary: {summary}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run full pipeline")
     parser.add_argument("--optimize", action="store_true", help="Use pipeline optimizer")
+    parser.add_argument("--multi", help="Path to YAML with multiple features")
     args = parser.parse_args()
-    main(optimize=args.optimize)
+    main(optimize=args.optimize, multi=args.multi)

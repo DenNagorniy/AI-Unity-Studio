@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MultiFeature Summary</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    table { border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; }
+    .success { background-color: #c8e6c9; }
+    .error { background-color: #ffccbc; }
+  </style>
+</head>
+<body>
+<h1>Multi-Feature Summary</h1>
+<table>
+  <tr>
+    <th>Название фичи</th>
+    <th>Статус</th>
+    <th>Время (с)</th>
+    <th>Ссылка</th>
+  </tr>
+  {% for r in results %}
+  <tr class="{{ r.status }}">
+    <td>{{ r.name }}</td>
+    <td>{{ r.status }}</td>
+    <td>{{ '%.2f'|format(r.time) }}</td>
+    <td><a href="{{ r.summary }}">summary.html</a></td>
+  </tr>
+  {% endfor %}
+</table>
+<h2>Metadata</h2>
+<ul>
+  <li>Общее время: {{ metadata.total_time }} с</li>
+  <li>Фич: {{ metadata.count }}</li>
+  <li>Успехов: {{ metadata.success }}</li>
+  <li>Ошибок: {{ metadata.errors }}</li>
+  <li>Дата: {{ metadata.date }}</li>
+</ul>
+</body>
+</html>
