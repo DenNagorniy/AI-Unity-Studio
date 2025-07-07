@@ -40,4 +40,3 @@ def run(input: dict) -> dict:
     }
     log_trace("RefactorAgent", "run", input, result)
     return result
-

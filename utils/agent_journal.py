@@ -34,4 +34,3 @@ def log_trace(agent: str, stage: str, data_in: Any, data_out: Any) -> None:
     }
     with TRACE_PATH.open("a", encoding="utf-8") as f:
         f.write(f"{json.dumps(entry, ensure_ascii=False)}\n")
-

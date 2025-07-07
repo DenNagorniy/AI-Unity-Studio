@@ -120,4 +120,3 @@ def run(task_spec) -> dict:
 
 if __name__ == "__main__":
     print(json.dumps(tester({}), indent=2, ensure_ascii=False))
-

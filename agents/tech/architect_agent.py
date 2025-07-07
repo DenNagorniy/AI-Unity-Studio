@@ -39,4 +39,3 @@ def run(input: dict) -> dict:
     log_trace("ArchitectAgent", "run", input, result)
     agent_memory.write("architecture", result)
     return result
-

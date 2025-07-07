@@ -38,4 +38,3 @@ def run(input: dict) -> dict:
     result = {"target": target, "artifact": artifact, "status": status}
     log_trace("BuildAgent", "run", input, result)
     return result
-

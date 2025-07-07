@@ -33,4 +33,3 @@ def run(input: dict) -> dict:
     result = {"lorebook": str(lore_path)}
     log_trace("LoreKeeperAgent", "run", input, result)
     return result
-

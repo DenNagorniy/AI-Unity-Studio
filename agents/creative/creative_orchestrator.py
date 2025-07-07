@@ -21,4 +21,3 @@ def run(input: dict) -> dict:
     Path("idea_spec.json").write_text(json.dumps(spec, indent=2, ensure_ascii=False), encoding="utf-8")
     log_trace("CreativeOrchestrator", "run", input, spec)
     return spec
-

@@ -37,4 +37,3 @@ def run(feature: dict) -> dict:
     log_trace("ProjectManagerAgent", "run", feature, result)
     agent_memory.write("tasks", result)
     return result
-
