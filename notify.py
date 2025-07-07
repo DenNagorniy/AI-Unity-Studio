@@ -45,12 +45,21 @@ def _send_email(html: str) -> None:
         print(f"Email send error: {e}")
 
 
-def _send_slack(text: str) -> None:
+def _send_slack(text: str, artifacts: list[str] | None = None) -> None:
     url = os.getenv("SLACK_URL")
     if not url:
         return
     try:
-        requests.post(url, json={"text": text}, timeout=10)
+        data = {"text": text}
+        extra: dict[str, str] = {}
+        for art in artifacts or []:
+            extra[art] = ""
+        requests.post(
+            url,
+            json=data,
+            timeout=10,
+            **extra,
+        )
     except Exception as e:  # noqa: PERF203
         print(f"Slack send error: {e}")
 
@@ -62,15 +71,28 @@ def _send_telegram(text: str) -> None:
         return
     api_url = f"https://api.telegram.org/bot{token}/sendMessage"
     try:
-        requests.post(api_url, data={"chat_id": chat_id, "text": text}, timeout=10)
+        requests.post(
+            api_url,
+            data={"chat_id": chat_id, "text": text},
+            timeout=10,
+        )
     except Exception as e:  # noqa: PERF203
         print(f"Telegram send error: {e}")
 
 
-def notify_all(summary_path: str, changelog_path: str, artifacts: list[str] | None = None) -> None:
+def notify_all(
+    summary_path: str,
+    changelog_path: str,
+    artifacts: list[str] | None = None,
+) -> None:
     """Send notification across all configured channels."""
     artifacts = artifacts or []
-    changelog = Path(changelog_path).read_text(encoding="utf-8") if Path(changelog_path).exists() else ""
+    changelog_file = Path(changelog_path)
+    changelog = (
+        changelog_file.read_text(encoding="utf-8")
+        if changelog_file.exists()
+        else ""
+    )
     context = {
         "summary_path": summary_path,
         "artifacts": artifacts,
@@ -81,7 +103,7 @@ def notify_all(summary_path: str, changelog_path: str, artifacts: list[str] | No
     tg_text = _render("telegram.txt", **context)
 
     _send_email(html)
-    _send_slack(slack_text)
+    _send_slack(slack_text, artifacts)
     _send_telegram(tg_text)
 
     log_action("Notifier", "notification sent")
