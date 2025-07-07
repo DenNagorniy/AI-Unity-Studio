@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
@@ -22,6 +23,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(self._read_status())
         elif self.path == "/reports":
             self._send_json(self._collect_reports())
+        elif self.path == "/ci-status":
+            self._send_json(self._read_ci_status())
         else:
             self.send_response(404)
             self.end_headers()
@@ -60,6 +63,28 @@ class Handler(BaseHTTPRequestHandler):
             "summary": summary,
             "changelog": changelog,
         }
+
+    def _read_ci_status(self) -> dict:
+        if STATUS_FILE.exists():
+            try:
+                data = json.loads(STATUS_FILE.read_text(encoding="utf-8"))
+                features = []
+                for name, info in data.get("features", {}).items():
+                    features.append(
+                        {
+                            "feature": name,
+                            "status": info.get("status"),
+                            "started": info.get("started"),
+                            "ended": info.get("ended"),
+                            "duration": info.get("duration"),
+                            "summary": info.get("summary_path"),
+                            "multi": info.get("is_multi", False),
+                        }
+                    )
+                return {"features": features}
+            except Exception:
+                pass
+        return {"features": []}
 
 
 def run(server_address: tuple[str, int] = ("", PORT)) -> None:

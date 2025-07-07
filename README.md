@@ -125,12 +125,15 @@ TELEGRAM_CHAT_ID=123456
 
 ### Мониторинг
 
-`ci_monitor.py` предоставляет методы `GET /status` и `GET /reports`.
+`ci_monitor.py` предоставляет методы `GET /status`, `GET /reports` и `GET /ci-status`.
 
 - `/status` — текущий статус пайплайна из `pipeline_status.json`.
 - `/reports` — список артефактов, а также пути к summary и `CHANGELOG.md`.
+- `/ci-status` — JSON о прогрессе всех фич.
 
 Для монитора используется порт из `MONITOR_PORT`.
+Интерфейс наблюдения доступен на [http://localhost:8000/ci-status](http://localhost:8000/ci-status).
+Он работает при запуске `run_all.py` с опцией `--multi`.
 
 ## Asset Pipeline
 

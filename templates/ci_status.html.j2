@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CI Status</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    table { border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; }
+    .passed { background-color: #c8e6c9; }
+    .failed { background-color: #ffccbc; }
+    .running { background-color: #bbdefb; }
+    .queued { background-color: #eeeeee; }
+  </style>
+  <script>
+    async function refresh() {
+      const resp = await fetch('{{ monitor_url }}');
+      const data = await resp.json();
+      const tbody = document.getElementById('ci-body');
+      tbody.innerHTML = '';
+      for (const f of data.features) {
+        const tr = document.createElement('tr');
+        tr.className = f.status;
+        tr.innerHTML = `<td>${f.feature}</td>`+
+                       `<td>${f.status}</td>`+
+                       `<td>${f.started ? new Date(f.started*1000).toLocaleTimeString() : ''}</td>`+
+                       `<td>${f.ended ? new Date(f.ended*1000).toLocaleTimeString() : ''}</td>`+
+                       `<td>${f.duration ?? ''}</td>`+
+                       `<td>${f.summary ? `<a href="${f.summary}">summary</a>` : ''}</td>`+
+                       `<td>${f.multi ? 'multi' : 'single'}</td>`;
+        tbody.appendChild(tr);
+      }
+    }
+    setInterval(refresh, 5000);
+    window.onload = refresh;
+  </script>
+</head>
+<body>
+<h1>CI Status</h1>
+<table>
+  <tr>
+    <th>Feature</th>
+    <th>Status</th>
+    <th>Started</th>
+    <th>Ended</th>
+    <th>Duration (s)</th>
+    <th>Summary</th>
+    <th>Mode</th>
+  </tr>
+  <tbody id="ci-body"></tbody>
+</table>
+</body>
+</html>
