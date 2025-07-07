@@ -17,6 +17,7 @@ import ci_build
 import ci_test
 from agents.tech import feature_inspector
 from agents.creative import lore_validator
+import feature_review_panel
 import run_pipeline
 from auto_escalation import main as run_escalation
 from ci_publish import _load_env
@@ -145,6 +146,8 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     if tl_patch.exists():
         apply_emergency_patch(feature_name, str(tl_patch))
 
+    review_result = feature_review_panel.run({"feature": feature_name, "out_dir": str(reports)})
+
     publish_status = "success"
     if cfg["steps"].get("publish", True):
         try:
@@ -174,6 +177,7 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     agent_results["FeatureInspectorAgent"] = insp_status
     lore_status = "success" if lore_result.get("status") == "LorePass" else "error"
     agent_results["LoreValidatorAgent"] = lore_status
+    agent_results["AIReviewPanel"] = review_result.get("verdict", "accept")
     try:
         test_data = json.loads((reports / "ci_test.json").read_text(encoding="utf-8"))
         build_data = json.loads((reports / "ci_build.json").read_text(encoding="utf-8"))
@@ -188,6 +192,7 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
             f"- Build: {build_status}",
             f"- Feature Inspection: {insp_result['verdict']}",
             f"- Lore Validation: {lore_result['status']}",
+            f"- Review Panel: {review_result['verdict']}",
         ]
     except Exception:
         pass
