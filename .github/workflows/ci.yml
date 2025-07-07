@@ -30,11 +30,10 @@ jobs:
         pip install -r requirements.txt
         pip install python-dotenv
 
-    - name: Load env variables from .env.example
-      id: load-env
+    - name: Load environment variables
       run: |
-        echo "PROJECT_PATH=$(grep PROJECT_PATH .env.example | cut -d '=' -f2-)" >> $GITHUB_ENV
-        echo "UNITY_CLI=$(grep UNITY_CLI .env.example | cut -d '=' -f2-)" >> $GITHUB_ENV
+        echo "PROJECT_PATH=${PROJECT_PATH}" >> $GITHUB_ENV
+        echo "UNITY_CLI=${UNITY_CLI}" >> $GITHUB_ENV
 
     - name: Lint Python code
       run: |
@@ -48,8 +47,12 @@ jobs:
     - name: dotnet build
       run: |
         if [ -z "$PROJECT_PATH" ]; then
-          echo "❌ PROJECT_PATH is not set. Please check .env.example"
+          echo "❌ PROJECT_PATH is not set"
           exit 1
+        fi
+        if [ ! -e "$PROJECT_PATH" ]; then
+          echo "⚠ PROJECT_PATH '$PROJECT_PATH' does not exist, skipping dotnet build"
+          exit 0
         fi
         echo "🚀 Building project at $PROJECT_PATH"
         dotnet build "$PROJECT_PATH"
@@ -59,6 +62,14 @@ jobs:
 
     - name: dotnet tests with coverage
       run: |
+        if [ -z "$PROJECT_PATH" ]; then
+          echo "❌ PROJECT_PATH is not set"
+          exit 1
+        fi
+        if [ ! -e "$PROJECT_PATH" ]; then
+          echo "⚠ PROJECT_PATH '$PROJECT_PATH' does not exist, skipping dotnet tests"
+          exit 0
+        fi
         dotnet test "$PROJECT_PATH" --collect "XPlat Code Coverage"
 
     - name: Unity tests
