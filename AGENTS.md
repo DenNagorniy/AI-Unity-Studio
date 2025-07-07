@@ -23,7 +23,7 @@
 * CoderAgent — ready
 * TesterAgent — ready
 * RefactorAgent — ready
-* ReviewAgent — ready
+* ReviewAgent — ready, создаёт review_report.md
 * BuildAgent — ready
 * TeamLeadAgent — ready
 
@@ -55,4 +55,4 @@
 
 ## Current Milestone
 
-v1.0 in progress
+v1.0 RC in progress

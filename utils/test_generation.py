@@ -1,6 +1,6 @@
+import json
 import re
 from pathlib import Path
-import json
 
 
 def is_static_class(script_path: str, source_code: str | None = None) -> bool:
@@ -18,9 +18,7 @@ def is_static_class(script_path: str, source_code: str | None = None) -> bool:
     return re.search(pattern, text) is not None
 
 
-def generate_test_files(
-    script_path: str, namespace: str, source_code: str | None = None
-) -> list[dict]:
+def generate_test_files(script_path: str, namespace: str, source_code: str | None = None) -> list[dict]:
     """Return patch modifications for basic tests of the given C# script."""
     class_name = Path(script_path).stem
     is_static = is_static_class(script_path, source_code)
@@ -96,7 +94,7 @@ def generate_test_files(
             f"        public IEnumerator {class_name}ExistsInScene()\n"
             "        {\n"
             f"            var go = GameObject.FindObjectOfType<{class_name}>();\n"
-            f"            Assert.IsNotNull(go, \"{class_name} script is not found in the scene.\");\n"
+            f'            Assert.IsNotNull(go, "{class_name} script is not found in the scene.");\n'
             "            yield return null;\n"
             "        }\n"
             "    }\n"

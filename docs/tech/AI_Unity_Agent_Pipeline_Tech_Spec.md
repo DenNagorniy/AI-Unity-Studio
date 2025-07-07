@@ -35,6 +35,8 @@
 - `journal.json` — журнал действий
 - `metrics.json` — показатели пайплайна
 - `TestResults.xml` — Unity тесты
+- `review_report.md` — отчёт статического анализа
+- `ci_reports/` — собранные артефакты CI
 
 ## 🛠 CLI
 ```bash
@@ -43,6 +45,7 @@ python tools/mapctl.py summary   # краткая статистика
 python tools/mapctl.py index    # обновить FeatureIndex.md
 python ci_test.py               # запустить тесты в CI
 python ci_build.py              # сборка проекта в CI
+python run_all.py               # полный цикл
 
 ## 📡 Dashboard API
 ```bash
