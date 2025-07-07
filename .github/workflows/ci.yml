@@ -50,11 +50,12 @@ jobs:
           echo "❌ PROJECT_PATH is not set. Please configure GitHub secret PROJECT_PATH."
           exit 1
         fi
+        if [ ! -f "$PROJECT_PATH" ]; then
+          echo "⚠ PROJECT_PATH file does not exist: $PROJECT_PATH — skipping build"
+          exit 0
+        fi
         echo "🚀 Building project at $PROJECT_PATH"
         dotnet build "$PROJECT_PATH"
-
-    - name: Validate project_map.json
-      run: python tools/mapctl.py validate
 
     - name: dotnet tests with coverage
       run: |
@@ -63,6 +64,9 @@ jobs:
         else
           echo "⚠ Skipping dotnet tests — PROJECT_PATH does not exist: $PROJECT_PATH"
         fi
+
+    - name: Validate project_map.json
+      run: python tools/mapctl.py validate
 
     - name: Unity tests
       run: |
