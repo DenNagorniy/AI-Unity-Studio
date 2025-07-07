@@ -73,9 +73,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def run(server_address: tuple[str, int] = ("", PORT)) -> None:
     httpd = HTTPServer(server_address, Handler)
-    print(
-        f"CI webhook listening on http://{server_address[0] or 'localhost'}:{server_address[1]}/trigger"
-    )
+    print(f"CI webhook listening on http://{server_address[0] or 'localhost'}:{server_address[1]}/trigger")
     httpd.serve_forever()
 
 

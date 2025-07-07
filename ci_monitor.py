@@ -55,9 +55,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def run(server_address: tuple[str, int] = ("", PORT)) -> None:
     httpd = HTTPServer(server_address, Handler)
-    print(
-        f"CI monitor running on http://{server_address[0] or 'localhost'}:{server_address[1]}"
-    )
+    print(f"CI monitor running on http://{server_address[0] or 'localhost'}:{server_address[1]}")
     httpd.serve_forever()
 
 
