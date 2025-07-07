@@ -1,6 +1,7 @@
 from pathlib import Path
-from utils import git_tools
+
 from config import UNITY_SCRIPTS_PATH
+from utils import git_tools
 
 
 def save_to_unity_structure(modification):

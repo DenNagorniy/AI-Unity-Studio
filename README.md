@@ -29,3 +29,10 @@ SceneBuilderAgent / CoderAgent → TesterAgent → BuildAgent → TeamLeadAgent 
 pip install -r requirements.txt
 cp .env.example .env  # Указать свои пути в .env
 python -m agents.tech.orchestrator "Hello world feature"
+```
+
+Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → Build → TeamLead.
+
+## Лицензия
+Проект распространяется под лицензией MIT. См. файл [LICENSE](LICENSE) для подробностей.
+
