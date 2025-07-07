@@ -10,6 +10,7 @@
 | SceneBuilderAgent   | Генерирует сцены, префабы                   |
 | CoderAgent          | Пишет C# код, генерирует git-patch          |
 | TesterAgent         | Запускает Unity CLI тесты, анализ JUnit     |
+| FeatureInspectorAgent (v2.0) | Проверка фич на целостность |
 | RefactorAgent       | Roslyn анализ, форматирование               |
 | BuildAgent          | Сборка WebGL / Android                      |
 | TeamLeadAgent       | Оркестрация, журналирование, метрики        |
@@ -29,6 +30,7 @@
 * BuildAgent — ready
 * TeamLeadAgent — ready
 * AssetCrafter — ready (v1.1)
+* FeatureInspectorAgent — prototype (v2.0)
 
 ## 🎨 Creative Agents
 
@@ -55,6 +57,7 @@
 | v0.8    | Multi-platform билд                   |
 | v0.9    | Asset pipeline                        |
 | v1.0    | Production AI studio                  |
+| v2.0    | FeatureInspectorAgent integration |
 
 ## Current Milestone
 

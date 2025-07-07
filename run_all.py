@@ -15,6 +15,7 @@ import yaml
 import ci_assets
 import ci_build
 import ci_test
+from agents.tech import feature_inspector
 import run_pipeline
 from auto_escalation import main as run_escalation
 from ci_publish import _load_env
@@ -76,6 +77,7 @@ ALL_AGENTS = [
     "SceneBuilderAgent",
     "CoderAgent",
     "TesterAgent",
+    "FeatureInspectorAgent",
     "ReviewAgent",
     "BuildAgent",
     "RefactorAgent",
@@ -111,6 +113,7 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
             shutil.copy(Path(name), reports / Path(name).name)
 
     ci_test.main()
+    insp_result = feature_inspector.run({"feature": feature_name, "out_dir": str(reports)})
     if cfg["steps"].get("build", True):
         ci_build.main()
 
@@ -147,6 +150,8 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
         *[f"- {entry}" for entry in lines[-20:]],
     ]
     agent_results = {}
+    insp_status = "success" if insp_result.get("verdict") == "Pass" else "error"
+    agent_results["FeatureInspectorAgent"] = insp_status
     try:
         test_data = json.loads((reports / "ci_test.json").read_text(encoding="utf-8"))
         build_data = json.loads((reports / "ci_build.json").read_text(encoding="utf-8"))
@@ -159,6 +164,7 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
             "## CI Results",
             f"- Tests: {test_status}",
             f"- Build: {build_status}",
+            f"- Feature Inspection: {insp_result['verdict']}",
         ]
     except Exception:
         pass
