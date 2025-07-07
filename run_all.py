@@ -2,30 +2,59 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import shutil
 from pathlib import Path
 
+import ci_assets
 import ci_build
 import ci_test
 from ci_publish import _load_env
 from ci_publish import main as publish_main
 from notify import notify_all
+from pipeline_optimizer import suggest_optimizations
 from run_pipeline import main as pipeline_main
 from tools.gen_changelog import main as gen_changelog
 from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
 from utils.pipeline_config import load_config
-import ci_assets
+
+ALL_AGENTS = [
+    "GameDesignerAgent",
+    "ProjectManagerAgent",
+    "ArchitectAgent",
+    "SceneBuilderAgent",
+    "CoderAgent",
+    "TesterAgent",
+    "ReviewAgent",
+    "BuildAgent",
+    "RefactorAgent",
+]
 
 
-def main() -> None:
+def _apply_skip(base: list[str], flags: list[str]) -> list[str]:
+    skip = {f.split("=")[1] for f in flags}
+    mapped = {f"{name.capitalize()}Agent" for name in skip}
+    return [a for a in base if a not in mapped]
+
+
+def main(optimize: bool = False) -> None:
     """Execute full CI pipeline."""
     cfg = load_config()
 
+    agents = cfg.get("agents") or ALL_AGENTS
+    if optimize:
+        opt = suggest_optimizations("agent_trace.log", "agent_learning.json")
+        agents = _apply_skip(agents, opt["skip_flags"])
+        if opt["opt_notes"]:
+            print(opt["opt_notes"])
+        if opt["warn_flags"]:
+            print("⚠ Possible skips:", ", ".join(opt["warn_flags"]))
+
     if os.getenv("SKIP_PIPELINE") != "1":
-        pipeline_main(cfg.get("agents"))
+        pipeline_main(agents)
 
     reports = Path(os.getenv("CI_REPORTS_DIR", "ci_reports"))
     reports.mkdir(exist_ok=True)
@@ -104,4 +133,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run full pipeline")
+    parser.add_argument("--optimize", action="store_true", help="Use pipeline optimizer")
+    args = parser.parse_args()
+    main(optimize=args.optimize)
