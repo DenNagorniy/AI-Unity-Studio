@@ -5,12 +5,14 @@ import subprocess
 from pathlib import Path
 
 import config
+from utils.agent_journal import log_action
 
 
 def run(input: dict) -> dict:
     """Build the project for a given target using Unity CLI."""
     target = input.get("target", "WebGL")
     out_dir = Path("Build") / target
+    log_action("BuildAgent", f"start {target}")
     cmd = [
         config.UNITY_CLI,
         "-batchmode",
@@ -22,13 +24,15 @@ def run(input: dict) -> dict:
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
 
+    Path("build.log").write_text(proc.stdout + proc.stderr, encoding="utf-8")
+
     artifact = str(out_dir.with_suffix(".zip"))
     if out_dir.exists():
         shutil.make_archive(out_dir.as_posix(), "zip", root_dir=out_dir)
+        status = "success"
+    else:
+        status = "missing"
 
-    return {
-        "target": target,
-        "artifact": artifact,
-        "stdout": proc.stdout[:1000],
-        "stderr": proc.stderr[:1000],
-    }
+    log_action("BuildAgent", status)
+
+    return {"target": target, "artifact": artifact, "status": status}

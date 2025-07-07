@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 
 import config
+from utils.agent_journal import log_action
 
 
 def run(input: dict) -> dict:
-    """Run Roslyn analyzers and check for dead code."""
+    """Run Roslyn analyzers and dotnet format, saving report to refactor_report.txt."""
+
+    log_action("RefactorAgent", "start")
 
     analyze_cmd = [
         "dotnet",
@@ -16,28 +20,21 @@ def run(input: dict) -> dict:
         "/property:RunAnalyzers=true",
     ]
     proc = subprocess.run(analyze_cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        raise RuntimeError(f"Roslyn analyzers failed: {proc.stderr.strip()}")
+    dead_code = [line.strip() for line in proc.stdout.splitlines() if "warning" in line and "is never used" in line]
 
-    dead_code = [
-        line.strip()
-        for line in proc.stdout.splitlines()
-        if "warning" in line and "is never used" in line
-    ]
-
-    format_cmd = [
-        "dotnet",
-        "format",
-        config.PROJECT_PATH,
-        "--verify-no-changes",
-    ]
+    format_cmd = ["dotnet", "format", config.PROJECT_PATH]
     fmt_proc = subprocess.run(format_cmd, capture_output=True, text=True)
-    if fmt_proc.returncode != 0:
-        raise RuntimeError(f"dotnet format failed: {fmt_proc.stderr.strip()}")
+
+    report_path = Path("refactor_report.txt")
+    report_path.write_text(proc.stdout + fmt_proc.stdout, encoding="utf-8")
+
+    if proc.returncode != 0 or fmt_proc.returncode != 0:
+        log_action("RefactorAgent", "failed")
+    else:
+        log_action("RefactorAgent", "completed")
 
     return {
         "returncode": proc.returncode or fmt_proc.returncode,
         "dead_code": dead_code,
-        "stdout": (proc.stdout + fmt_proc.stdout)[:1000],
-        "stderr": (proc.stderr + fmt_proc.stderr)[:1000],
+        "report": str(report_path),
     }

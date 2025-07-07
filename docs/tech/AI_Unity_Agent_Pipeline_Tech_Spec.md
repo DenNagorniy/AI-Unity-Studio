@@ -40,6 +40,7 @@
 ```bash
 python tools/mapctl.py validate  # проверить project_map.json
 python tools/mapctl.py summary   # краткая статистика
+python tools/mapctl.py index    # обновить FeatureIndex.md
 
 ## 🌱 Tech Roadmap
 
