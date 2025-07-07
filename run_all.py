@@ -13,6 +13,7 @@ from pathlib import Path
 import yaml
 
 import ab_tracker
+from agents.analytics import user_feedback
 import ci_assets
 import ci_build
 import ci_test
@@ -160,6 +161,7 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     )
 
     ab_tracker.run({"out_dir": str(reports)})
+    feedback_result = user_feedback.run({"out_dir": str(reports)})
 
     publish_status = "success"
     if cfg["steps"].get("publish", True):
@@ -191,6 +193,7 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     lore_status = "success" if lore_result.get("status") == "LorePass" else "error"
     agent_results["LoreValidatorAgent"] = lore_status
     agent_results["AIReviewPanel"] = review_result.get("verdict", "accept")
+    agent_results["UserFeedbackAgent"] = feedback_result.get("status", "success")
     try:
         test_data = json.loads((reports / "ci_test.json").read_text(encoding="utf-8"))
         build_data = json.loads((reports / "ci_build.json").read_text(encoding="utf-8"))
@@ -230,7 +233,12 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     print(summary)
 
     agent_results["Publish"] = publish_status
-    summary_path = generate_summary(urls, agent_results, out_dir=str(reports))
+    feedback_text = ""
+    try:
+        feedback_text = Path(feedback_result["report"]).read_text(encoding="utf-8")
+    except Exception:
+        pass
+    summary_path = generate_summary(urls, agent_results, feedback_text, out_dir=str(reports))
     print(f"Summary HTML: {summary_path}")
 
     generate_ci_overview(out_dir=str(reports))
