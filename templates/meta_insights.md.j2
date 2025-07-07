@@ -1,0 +1,22 @@
+# Meta Insights
+
+{% if failures %}
+## Frequent Failures
+{% for f in failures %}- {{ f.agent }}: {{ f.fails }}/{{ f.total }} failures ({{ (f.rate * 100) | round(1) }}%)
+{% endfor %}
+{% endif %}
+
+{% if autofix %}
+## Repeated Auto-Fix Patterns
+{% for a in autofix %}- {{ a.agent }}: {{ a.count }} repeating patterns
+{% endfor %}
+{% endif %}
+
+## Agent Performance
+{% for p in performance %}- {{ p.agent }}: avg {{ p.avg_time }}s over {{ p.calls }} calls
+{% endfor %}
+
+{% if quality.avg_rating %}
+## Generation Quality
+- Average user rating: {{ quality.avg_rating }}
+{% endif %}

@@ -49,6 +49,9 @@ TEMPLATE = """<!DOCTYPE html>
 <h2>User Feedback</h2>
 <pre>{{ feedback }}</pre>
 
+<h2>Meta Insights</h2>
+<pre>{{ meta }}</pre>
+
 <h2>Metadata</h2>
 <ul>
   <li>Date: {{ metadata.date }}</li>
@@ -67,6 +70,7 @@ def _render(
     metadata: dict[str, str],
     changelog: str,
     feedback: str,
+    meta: str = "",
 ) -> str:
     env = Environment()
     template = env.from_string(TEMPLATE)
@@ -76,6 +80,7 @@ def _render(
         metadata=metadata,
         changelog=changelog,
         feedback=feedback,
+        meta=meta,
     )
 
 
@@ -83,6 +88,7 @@ def generate_summary(
     artifact_urls: list[str],
     agent_results: dict[str, str],
     feedback: str = "",
+    meta_insights: str = "",
     out_dir: str = "ci_reports",
 ) -> Path:
     """Create summary.html from given data."""
@@ -106,7 +112,9 @@ def generate_summary(
     if asset_report.exists():
         artifact_urls = list(artifact_urls) + [asset_report.as_posix()]
 
-    html = _render(artifact_urls, agent_results, metadata, changelog, feedback)
+    html = _render(
+        artifact_urls, agent_results, metadata, changelog, feedback, meta_insights
+    )
     out_directory = Path(out_dir)
     out_directory.mkdir(exist_ok=True)
     out_path = out_directory / "summary.html"
@@ -118,7 +126,8 @@ def main() -> None:
     urls = json.loads(os.getenv("SUMMARY_ARTIFACTS", "[]"))
     agents = json.loads(os.getenv("SUMMARY_AGENTS", "{}"))
     feedback = os.getenv("SUMMARY_FEEDBACK", "")
-    path = generate_summary(urls, agents, feedback)
+    meta = os.getenv("SUMMARY_META", "")
+    path = generate_summary(urls, agents, feedback, meta_insights=meta)
     print(path)
 
 
