@@ -23,6 +23,7 @@
 * CoderAgent — ready
 * TesterAgent — ready
 * RefactorAgent — ready
+* ReviewAgent — ready
 * BuildAgent — ready
 * TeamLeadAgent — ready
 

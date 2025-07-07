@@ -41,6 +41,14 @@
 python tools/mapctl.py validate  # проверить project_map.json
 python tools/mapctl.py summary   # краткая статистика
 python tools/mapctl.py index    # обновить FeatureIndex.md
+python ci_test.py               # запустить тесты в CI
+python ci_build.py              # сборка проекта в CI
+
+## 📡 Dashboard API
+```bash
+python dashboard_api.py
+```
+GET http://localhost:8000/data
 
 ## 🌱 Tech Roadmap
 
