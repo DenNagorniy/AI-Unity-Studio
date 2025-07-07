@@ -132,6 +132,13 @@ Agent  Calls  Successes  Fixes  Example Prompt          Hint
 Coder  12     10         2      "Создай MonoBehaviour"  "Использован шаблон BaseMono"
 ```
 
+## Trace Report
+
+`tools/gen_trace_report.py` анализирует `agent_trace.log` и создаёт страницу
+`ci_reports/trace_report.html` с таблицей времени работы агентов и интерактивным
+таймлайном. В отчёте также показываются рекомендации по флагам `--skip` для
+повторного запуска пайплайна без уже успешных шагов.
+
 ## Лицензия
 
 ```makefile
