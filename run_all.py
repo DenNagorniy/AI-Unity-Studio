@@ -28,6 +28,7 @@ from tools.gen_multifeature_summary import generate_multifeature_summary
 from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
 from utils.backup_manager import restore_backup, save_backup
+from ci_revert import apply_emergency_patch, save_success_state
 from utils.pipeline_config import load_config
 
 STATUS_PATH = Path("pipeline_status.json")
@@ -87,8 +88,8 @@ def _apply_skip(base: list[str], flags: list[str]) -> list[str]:
     return [a for a in base if a not in mapped]
 
 
-def run_once(optimize: bool = False) -> tuple[Path, dict]:
-    """Execute full CI pipeline."""
+def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path, dict]:
+    """Execute full CI pipeline for a feature."""
     cfg = load_config()
 
     agents = cfg.get("agents") or ALL_AGENTS
@@ -115,6 +116,11 @@ def run_once(optimize: bool = False) -> tuple[Path, dict]:
 
     # Auto-escalation after tests and auto-fix phase
     run_escalation(out_dir=str(reports))
+
+    # Apply rollback patch from TeamLead if present
+    tl_patch = reports / "teamlead_patch.json"
+    if tl_patch.exists():
+        apply_emergency_patch(feature_name, str(tl_patch))
 
     publish_status = "success"
     if cfg["steps"].get("publish", True):
@@ -205,7 +211,7 @@ def _run_feature(name: str, prompt: str, optimize: bool) -> dict:
     status = "success"
     _update_feature(name, {"status": "running", "started": start})
     try:
-        summary, results = run_once(optimize)
+        summary, results = run_once(optimize, name)
     except (SystemExit, Exception) as e:  # noqa: PERF203
         print(f"Feature {name} failed: {e}")
         status = "error"
@@ -233,6 +239,9 @@ def _run_feature(name: str, prompt: str, optimize: bool) -> dict:
             "agent_results": results,
         },
     )
+
+    if status == "success":
+        save_success_state(name, ".")
     return {
         "name": name,
         "status": status,
@@ -249,7 +258,7 @@ def main(optimize: bool = False, multi: str | None = None) -> None:
         start = time.time()
         _update_feature(name, {"status": "running", "started": start})
         try:
-            summary, results = run_once(optimize)
+            summary, results = run_once(optimize, name)
             status = "passed"
         except Exception:
             status = "failed"
@@ -269,6 +278,8 @@ def main(optimize: bool = False, multi: str | None = None) -> None:
                     "agent_results": results,
                 },
             )
+            if status == "passed":
+                save_success_state(name, ".")
         return
 
     data = yaml.safe_load(Path(multi).read_text(encoding="utf-8")) or {}

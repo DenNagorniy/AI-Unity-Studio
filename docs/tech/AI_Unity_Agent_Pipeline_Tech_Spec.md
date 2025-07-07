@@ -67,6 +67,12 @@ python ci_assets.py  # генерирует ассеты из asset_requests.jso
 вызывает `TeamLeadAgent` для анализа и генерирует отчёт
 `ci_reports/autofailure_report.md`.
 
+### CI Revert
+После успешного CI-прогона рабочая копия сохраняется в
+`.ci_backups/<feature>/`. Если автоисправление не помогло и TeamLeadAgent
+выдал патч `teamlead_patch.json`, скрипт `ci_revert.py` восстанавливает
+бэкап и применяет патч как Emergency Patch.
+
 ### Agent Learning
 Агенты ведут блок `learning_log` в `agent_memory.json`.\
 Каждая итерация сохраняет вход, выход и статус (`success` или `error`).\
@@ -109,6 +115,7 @@ python ci_test.py               # запустить тесты в CI
 python ci_build.py              # сборка проекта в CI
 python run_all.py               # полный цикл
 python run_all.py --optimize    # пропустить быстрые шаги
+python ci_revert.py             # восстановление из бэкапа
 python agent_playground.py --repl   # интерактивный режим
 
 ### pipeline_config.yaml
