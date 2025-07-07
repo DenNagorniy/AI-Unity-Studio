@@ -31,6 +31,7 @@
 * TeamLeadAgent — ready
 * AssetCrafter — ready (v1.1)
 * FeatureInspectorAgent — prototype (v2.0)
+* LoreValidatorAgent — v2.0 beta
 
 ## 🎨 Creative Agents
 
@@ -39,6 +40,7 @@
 | GameDesignerAgent       | Core loop, мета-прогрессия                |
 | NarrativeDesignerAgent  | Диалоги, сцены, сюжет                     |
 | LoreKeeperAgent         | База лора, факты                          |
+| LoreValidatorAgent      | Проверка соответствия фич лору            |
 | ArtMoodAgent            | Визуальный стиль, moodboard               |
 | CreativeOrchestrator    | Координация креативных агентов            |
 

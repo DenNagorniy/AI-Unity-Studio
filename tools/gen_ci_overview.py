@@ -28,6 +28,7 @@ def _load_features(status_path: Path = STATUS_FILE) -> List[Dict[str, Any]]:
                     {
                         "name": name,
                         "status": info.get("status"),
+                        "lore": info.get("agent_results", {}).get("LoreValidatorAgent"),
                         "started": info.get("started"),
                         "ended": info.get("ended"),
                         "summary": info.get("summary_path"),

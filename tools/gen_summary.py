@@ -43,6 +43,9 @@ TEMPLATE = """<!DOCTYPE html>
 {% endfor %}
 </table>
 
+<h2>Lore Validation</h2>
+<p>Status: {{ agent_results.get('LoreValidatorAgent', 'n/a') }}</p>
+
 <h2>Metadata</h2>
 <ul>
   <li>Date: {{ metadata.date }}</li>

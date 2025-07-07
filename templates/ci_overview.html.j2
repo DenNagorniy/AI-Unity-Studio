@@ -41,6 +41,7 @@
         const icon = icons[f.status] || '';
         tr.innerHTML = `<td>${f.feature || f.name}</td>`+
                        `<td>${icon} ${f.status}</td>`+
+                       `<td>${f.lore || ''}</td>`+
                        `<td>${toTime(f.started)}</td>`+
                        `<td>${toTime(f.ended)}</td>`;
         tbody.appendChild(tr);
@@ -57,7 +58,7 @@
 
 <h2>Pipeline Progress</h2>
 <table>
-<tr><th>Feature</th><th>Status</th><th>Start</th><th>End</th></tr>
+<tr><th>Feature</th><th>Status</th><th>Lore</th><th>Start</th><th>End</th></tr>
 <tbody id="progress-body"></tbody>
 </table>
 
