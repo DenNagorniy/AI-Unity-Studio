@@ -39,3 +39,32 @@ def test_status_and_reports(monkeypatch, tmp_path):
         assert data["summary"].endswith("summary.html")
     finally:
         httpd.shutdown()
+
+
+def test_ci_status(monkeypatch, tmp_path):
+    data = {
+        "features": {
+            "feat": {
+                "status": "running",
+                "started": 1.0,
+                "ended": 2.0,
+                "duration": 1.0,
+                "summary_path": "feat/summary.html",
+                "agent_results": {},
+                "is_multi": True,
+            }
+        },
+        "multi": True,
+    }
+    status_file = tmp_path / "status.json"
+    status_file.write_text(json.dumps(data), encoding="utf-8")
+    monkeypatch.setattr(ci_monitor, "STATUS_FILE", status_file)
+    httpd, port = _start_server()
+    try:
+        resp = requests.get(f"http://localhost:{port}/ci-status", timeout=5)
+        assert resp.status_code == 200
+        info = resp.json()["features"][0]
+        assert info["feature"] == "feat"
+        assert info["status"] == "running"
+    finally:
+        httpd.shutdown()

@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 from datetime import datetime
+import time
 from pathlib import Path
 
 import ci_assets
@@ -23,6 +24,43 @@ from tools.gen_summary import generate_summary
 from tools.gen_multifeature_summary import generate_multifeature_summary
 from utils.agent_journal import read_entries
 from utils.pipeline_config import load_config
+
+STATUS_PATH = Path("pipeline_status.json")
+
+
+def _load_pipeline() -> dict:
+    if STATUS_PATH.exists():
+        try:
+            return json.loads(STATUS_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"features": {}, "multi": False}
+
+
+def _save_pipeline(data: dict) -> None:
+    STATUS_PATH.write_text(json.dumps(data), encoding="utf-8")
+
+
+def _init_features(names: list[str], multi: bool) -> None:
+    data = {"features": {}, "multi": multi}
+    for n in names:
+        data["features"][n] = {
+            "status": "queued",
+            "started": None,
+            "ended": None,
+            "duration": None,
+            "summary_path": "",
+            "agent_results": {},
+            "is_multi": multi,
+        }
+    _save_pipeline(data)
+
+
+def _update_feature(name: str, info: dict) -> None:
+    data = _load_pipeline()
+    feature = data.setdefault("features", {}).setdefault(name, {})
+    feature.update(info)
+    _save_pipeline(data)
 
 ALL_AGENTS = [
     "GameDesignerAgent",
@@ -43,7 +81,7 @@ def _apply_skip(base: list[str], flags: list[str]) -> list[str]:
     return [a for a in base if a not in mapped]
 
 
-def run_once(optimize: bool = False) -> Path:
+def run_once(optimize: bool = False) -> tuple[Path, dict]:
     """Execute full CI pipeline."""
     cfg = load_config()
 
@@ -134,7 +172,7 @@ def run_once(optimize: bool = False) -> Path:
 
     notify_all(str(summary_path), "CHANGELOG.md", urls)
 
-    return summary_path
+    return summary_path, agent_results
 
 
 def _run_feature(name: str, prompt: str, optimize: bool) -> dict:
@@ -148,13 +186,15 @@ def _run_feature(name: str, prompt: str, optimize: bool) -> dict:
     orig_ask = run_pipeline.ask_multiline
     run_pipeline.ask_multiline = lambda: prompt
 
-    start = datetime.utcnow()
+    start = time.time()
     status = "success"
+    _update_feature(name, {"status": "running", "started": start})
     try:
-        summary = run_once(optimize)
+        summary, results = run_once(optimize)
     except (SystemExit, Exception) as e:  # noqa: PERF203
         print(f"Feature {name} failed: {e}")
         status = "error"
+        results = {}
         summary = feature_dir / "summary.html"
     finally:
         run_pipeline.ask_multiline = orig_ask
@@ -163,8 +203,19 @@ def _run_feature(name: str, prompt: str, optimize: bool) -> dict:
         else:
             os.environ["CI_REPORTS_DIR"] = old_dir
 
-    duration = round((datetime.utcnow() - start).total_seconds(), 2)
+    end_time = time.time()
+    duration = round(end_time - start, 2)
     rel_summary = summary.relative_to(base_reports)
+    _update_feature(
+        name,
+        {
+            "status": "passed" if status == "success" else "failed",
+            "ended": end_time,
+            "duration": duration,
+            "summary_path": rel_summary.as_posix(),
+            "agent_results": results,
+        },
+    )
     return {
         "name": name,
         "status": status,
@@ -176,7 +227,31 @@ def _run_feature(name: str, prompt: str, optimize: bool) -> dict:
 def main(optimize: bool = False, multi: str | None = None) -> None:
     """Execute pipeline for one or multiple features."""
     if not multi:
-        run_once(optimize)
+        name = "single"
+        _init_features([name], False)
+        start = time.time()
+        _update_feature(name, {"status": "running", "started": start})
+        try:
+            summary, results = run_once(optimize)
+            status = "passed"
+        except Exception:
+            status = "failed"
+            results = {}
+            summary = Path("ci_reports") / "summary.html"
+        finally:
+            end_t = time.time()
+            dur = round(end_t - start, 2)
+            rel = summary.relative_to(Path("ci_reports"))
+            _update_feature(
+                name,
+                {
+                    "status": status,
+                    "ended": end_t,
+                    "duration": dur,
+                    "summary_path": rel.as_posix(),
+                    "agent_results": results,
+                },
+            )
         return
 
     data = yaml.safe_load(Path(multi).read_text(encoding="utf-8")) or {}
@@ -185,6 +260,8 @@ def main(optimize: bool = False, multi: str | None = None) -> None:
         print("Invalid YAML format: expected 'features' mapping")
         return
 
+    names = list(features.keys())
+    _init_features(names, True)
     results = []
     start_all = datetime.utcnow()
     for fname, prompt in features.items():
