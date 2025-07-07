@@ -12,16 +12,18 @@ from pathlib import Path
 
 import yaml
 
+import ab_tracker
 import ci_assets
 import ci_build
 import ci_test
-from agents.tech import feature_inspector
-from agents.creative import lore_validator
 import feature_review_panel
 import run_pipeline
+from agents.creative import lore_validator
+from agents.tech import feature_inspector
 from auto_escalation import main as run_escalation
 from ci_publish import _load_env
 from ci_publish import main as publish_main
+from ci_revert import apply_emergency_patch, save_success_state
 from notify import notify_all
 from pipeline_optimizer import suggest_optimizations
 from tools.gen_agent_stats import generate_agent_stats
@@ -31,7 +33,6 @@ from tools.gen_multifeature_summary import generate_multifeature_summary
 from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
 from utils.backup_manager import restore_backup, save_backup
-from ci_revert import apply_emergency_patch, save_success_state
 from utils.pipeline_config import load_config
 
 STATUS_PATH = Path("pipeline_status.json")
@@ -115,8 +116,14 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
             shutil.copy(Path(name), reports / Path(name).name)
 
     ci_test.main()
-    insp_result = feature_inspector.run({"feature": feature_name, "out_dir": str(reports)})
-    desc = Path("core_loop.md").read_text(encoding="utf-8") if Path("core_loop.md").exists() else ""
+    insp_result = feature_inspector.run(
+        {"feature": feature_name, "out_dir": str(reports)}
+    )
+    desc = (
+        Path("core_loop.md").read_text(encoding="utf-8")
+        if Path("core_loop.md").exists()
+        else ""
+    )
     catalog = {}
     if Path("asset_catalog.json").exists():
         try:
@@ -128,13 +135,15 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     if narr_dir.exists():
         for p in narr_dir.glob("*.json"):
             dialogues += p.read_text(encoding="utf-8") + "\n"
-    lore_result = lore_validator.run({
-        "feature": feature_name,
-        "description": desc,
-        "assets": catalog.get("assets", []),
-        "dialogues": dialogues,
-        "out_dir": str(reports),
-    })
+    lore_result = lore_validator.run(
+        {
+            "feature": feature_name,
+            "description": desc,
+            "assets": catalog.get("assets", []),
+            "dialogues": dialogues,
+            "out_dir": str(reports),
+        }
+    )
     if cfg["steps"].get("build", True):
         ci_build.main()
 
@@ -146,7 +155,11 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     if tl_patch.exists():
         apply_emergency_patch(feature_name, str(tl_patch))
 
-    review_result = feature_review_panel.run({"feature": feature_name, "out_dir": str(reports)})
+    review_result = feature_review_panel.run(
+        {"feature": feature_name, "out_dir": str(reports)}
+    )
+
+    ab_tracker.run({"out_dir": str(reports)})
 
     publish_status = "success"
     if cfg["steps"].get("publish", True):
@@ -336,7 +349,9 @@ def main(optimize: bool = False, multi: str | None = None) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run full pipeline")
-    parser.add_argument("--optimize", action="store_true", help="Use pipeline optimizer")
+    parser.add_argument(
+        "--optimize", action="store_true", help="Use pipeline optimizer"
+    )
     parser.add_argument("--multi", help="Path to YAML with multiple features")
     args = parser.parse_args()
     main(optimize=args.optimize, multi=args.multi)

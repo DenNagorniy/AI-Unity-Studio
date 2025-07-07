@@ -13,7 +13,7 @@
 
 ## 💡 Поток данных
 Запрос → GameDesignerAgent → ProjectManagerAgent → ArchitectAgent →
-SceneBuilderAgent / CoderAgent → TesterAgent → FeatureInspectorAgent → LoreValidatorAgent → BuildAgent → AI Review Panel → TeamLeadAgent → журналирование
+SceneBuilderAgent / CoderAgent → TesterAgent → FeatureInspectorAgent → LoreValidatorAgent → BuildAgent → AI Review Panel → ABTrackerAgent → TeamLeadAgent → журналирование
 
 ## Агенты
 | Агент | Краткая роль |
@@ -25,6 +25,7 @@ SceneBuilderAgent / CoderAgent → TesterAgent → FeatureInspectorAgent → Lor
 | CoderAgent | C# код |
 | TesterAgent | тесты |
 | BuildAgent | сборка |
+| ABTrackerAgent | A/B тестирование |
 | TeamLeadAgent | логирование |
 | AssetCrafter (v1.1) | генерация ассетов |
 
@@ -46,7 +47,7 @@ python run_all.py  # полный цикл: пайплайн + тесты + би
 python run_all.py --optimize  # пропустить быстрые шаги по истории
 ```
 
-Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → FeatureInspector → LoreValidator → Build → AssetCrafter → TeamLead.
+Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → FeatureInspector → LoreValidator → Build → AssetCrafter → AI Review → AB Tracker → TeamLead.
 
 Для запуска всего процесса и сохранения CI отчётов используйте `run_all.py`.
 
