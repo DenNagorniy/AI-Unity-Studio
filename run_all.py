@@ -32,6 +32,7 @@ from tools.gen_changelog import main as gen_changelog
 from tools.gen_ci_overview import generate_ci_overview
 from tools.gen_multifeature_summary import generate_multifeature_summary
 from tools.gen_summary import generate_summary
+from meta_agent import MetaAgent
 from utils.agent_journal import read_entries
 from utils.backup_manager import restore_backup, save_backup
 from utils.pipeline_config import load_config
@@ -238,7 +239,19 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
         feedback_text = Path(feedback_result["report"]).read_text(encoding="utf-8")
     except Exception:
         pass
-    summary_path = generate_summary(urls, agent_results, feedback_text, out_dir=str(reports))
+    meta_text = ""
+    try:
+        meta_result = MetaAgent(out_dir=str(reports)).run()
+        meta_text = Path(meta_result["report"]).read_text(encoding="utf-8")
+    except Exception:
+        pass
+    summary_path = generate_summary(
+        urls,
+        agent_results,
+        feedback_text,
+        meta_insights=meta_text,
+        out_dir=str(reports),
+    )
     print(f"Summary HTML: {summary_path}")
 
     generate_ci_overview(out_dir=str(reports))
