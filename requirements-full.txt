@@ -9,3 +9,4 @@ python-dotenv>=1.0
 requests>=2.0
 # unity-cli
 pyyaml>=6.0
+jinja2>=3.0
