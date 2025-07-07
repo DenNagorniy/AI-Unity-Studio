@@ -22,6 +22,7 @@ import run_pipeline
 from tools.gen_changelog import main as gen_changelog
 from tools.gen_summary import generate_summary
 from tools.gen_multifeature_summary import generate_multifeature_summary
+from tools.gen_agent_stats import generate_agent_stats
 from utils.agent_journal import read_entries
 from utils.pipeline_config import load_config
 
@@ -122,6 +123,7 @@ def run_once(optimize: bool = False) -> tuple[Path, dict]:
             print(f"Asset pipeline failed: {e}")
 
     gen_changelog()
+    generate_agent_stats(out_dir=str(reports))
 
     lines = read_entries()
     summary_lines = [

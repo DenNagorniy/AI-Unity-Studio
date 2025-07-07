@@ -88,6 +88,11 @@ Coder  12     10         2      "Создай MonoBehaviour"  "Использо�
 `agent_learning.json` и предлагает пропустить стабильные шаги через флаг
 `--optimize` у `run_all.py`.
 
+### Agent Analytics Report
+Страница `agent_stats.html` формируется скриптом `tools/gen_agent_stats.py` на
+основе `agent_journal.log`, `agent_memory.json` и `agent_trace.log` и содержит
+обобщённую статистику по вызовам агентов.
+
 
 ## 🛠 CLI
 ```bash

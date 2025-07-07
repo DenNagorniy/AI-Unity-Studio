@@ -99,6 +99,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(_load_learning_stats())
         elif self.path == "/trace":
             self._send_json(_load_trace_stats())
+        elif self.path == "/agent-stats":
+            self._send_html_file(Path("ci_reports") / "agent_stats.html")
         else:
             self.send_response(404)
             self.end_headers()
@@ -124,6 +126,18 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def _send_html_file(self, path: Path) -> None:
+        if path.exists():
+            body = path.read_text(encoding="utf-8").encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        else:
+            self.send_response(404)
+            self.end_headers()
 
 
 def run(server_address: tuple[str, int] = ("", 8000)) -> None:
