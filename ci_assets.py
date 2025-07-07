@@ -12,6 +12,7 @@ from utils.asset_qc import run_qc
 from tools.gen_assets_report import generate_assets_report
 from tools.gen_learning_report import generate_learning_report
 from tools.gen_trace_report import generate_trace_report
+from tools.gen_agent_stats import generate_agent_stats
 
 
 REQUESTS_FILE = Path(os.getenv("ASSET_REQUESTS", "asset_requests.json"))
@@ -35,6 +36,7 @@ def main() -> None:
     generate_assets_report(out_dir=str(reports))
     generate_learning_report(out_dir=str(reports))
     generate_trace_report(out_dir=str(reports))
+    generate_agent_stats(out_dir=str(reports))
     out_path = reports / "ci_assets.json"
     out_text = json.dumps(generated, indent=2, ensure_ascii=False)
     out_path.write_text(out_text, encoding="utf-8")

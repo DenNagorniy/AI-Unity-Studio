@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Agent Analytics Report</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 4px 8px; }
+</style>
+</head>
+<body>
+<h1>Agent Analytics Report</h1>
+<table>
+<tr>
+  <th>Agent</th>
+  <th>Calls</th>
+  <th>Auto-fixes</th>
+  <th>Successes</th>
+  <th>Failures</th>
+  <th>Avg time (s)</th>
+</tr>
+{% for s in stats %}
+<tr>
+  <td>{{ s.agent }}</td>
+  <td>{{ s.calls }}</td>
+  <td>{{ s.auto_fixes }}</td>
+  <td>{{ s.success }}</td>
+  <td>{{ s.fail }}</td>
+  <td>{{ s.avg_time if s.avg_time is not none else '' }}</td>
+</tr>
+{% endfor %}
+</table>
+<h2>Metadata</h2>
+<ul>
+  <li>Date: {{ metadata.date }}</li>
+  <li>User: {{ metadata.user }}</li>
+</ul>
+</body>
+</html>
