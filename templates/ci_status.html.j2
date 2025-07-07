@@ -7,47 +7,60 @@
     body { font-family: Arial, sans-serif; }
     table { border-collapse: collapse; }
     th, td { border: 1px solid #ccc; padding: 4px 8px; }
-    .passed { background-color: #c8e6c9; }
-    .failed { background-color: #ffccbc; }
-    .running { background-color: #bbdefb; }
-    .queued { background-color: #eeeeee; }
+    .in_progress { background-color: #fff9c4; }
+    .done { background-color: #c8e6c9; }
+    .error { background-color: #ffcdd2; }
   </style>
   <script>
+    function toTime(val) {
+      if (!val) return '';
+      if (typeof val === 'number') {
+        return new Date(val * 1000).toLocaleTimeString();
+      }
+      return new Date(val).toLocaleTimeString();
+    }
+
+    const icons = {
+      in_progress: '🟡',
+      done: '🟢',
+      error: '🔴'
+    };
+
     async function refresh() {
       const resp = await fetch('{{ monitor_url }}');
-      const data = await resp.json();
+      const json = await resp.json();
+      let items = json.features;
+      if (!items) {
+        items = Object.entries(json).map(([feature, info]) => ({ feature, ...info }));
+      }
       const tbody = document.getElementById('ci-body');
       tbody.innerHTML = '';
-      for (const f of data.features) {
+      for (const f of items) {
         const tr = document.createElement('tr');
         tr.className = f.status;
-        tr.innerHTML = `<td>${f.feature}</td>`+
-                       `<td>${f.status}</td>`+
-                       `<td>${f.started ? new Date(f.started*1000).toLocaleTimeString() : ''}</td>`+
-                       `<td>${f.ended ? new Date(f.ended*1000).toLocaleTimeString() : ''}</td>`+
-                       `<td>${f.duration ?? ''}</td>`+
-                       `<td>${f.summary ? `<a href="${f.summary}">summary</a>` : ''}</td>`+
-                       `<td>${f.multi ? 'multi' : 'single'}</td>`;
+        const icon = icons[f.status] || '';
+        tr.innerHTML = `<td>${f.feature || f.name}</td>`+
+                       `<td>${icon} ${f.status}</td>`+
+                       `<td>${toTime(f.start || f.started)}</td>`+
+                       `<td>${toTime(f.end || f.ended)}</td>`;
         tbody.appendChild(tr);
       }
     }
-    setInterval(refresh, 5000);
+
+    setInterval(refresh, 10000);
     window.onload = refresh;
   </script>
 </head>
 <body>
 <h1>CI Status</h1>
-<table>
+  <table>
   <tr>
     <th>Feature</th>
     <th>Status</th>
-    <th>Started</th>
-    <th>Ended</th>
-    <th>Duration (s)</th>
-    <th>Summary</th>
-    <th>Mode</th>
+    <th>Start</th>
+    <th>End</th>
   </tr>
   <tbody id="ci-body"></tbody>
-</table>
+  </table>
 </body>
 </html>
