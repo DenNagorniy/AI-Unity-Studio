@@ -18,4 +18,3 @@ def run(input: dict) -> dict:
     result = {"core_loop": core_loop, "file": "core_loop.md"}
     log_trace("CreativeGameDesigner", "run", input, result)
     return result
-

@@ -16,4 +16,3 @@ def run(input: dict) -> dict:
     result = {"moodboard": str(path)}
     log_trace("ArtMoodAgent", "run", input, result)
     return result
-

@@ -30,4 +30,3 @@ def run(input: dict) -> dict:
     log_trace("SceneBuilderAgent", "run", input, result)
     agent_memory.write("scene", result)
     return result
-

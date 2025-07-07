@@ -25,4 +25,3 @@ def run(input: dict) -> dict:
     result = {"scene": str(scene_path)}
     log_trace("NarrativeDesignerAgent", "run", input, result)
     return result
-

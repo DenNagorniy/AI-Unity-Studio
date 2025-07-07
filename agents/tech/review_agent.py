@@ -58,4 +58,3 @@ def run(_: dict | None = None) -> dict:
     result = {"status": status, "report": "review_report.json"}
     log_trace("ReviewAgent", "run", None, result)
     return result
-

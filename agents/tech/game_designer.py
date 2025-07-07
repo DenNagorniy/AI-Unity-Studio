@@ -22,4 +22,3 @@ def run(input: dict) -> dict:
     log_trace("GameDesignerAgent", "run", input, result)
     agent_memory.write("feature_description", result)
     return result
-
