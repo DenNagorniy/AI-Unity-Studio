@@ -6,24 +6,26 @@ import argparse
 import json
 import os
 import shutil
-from datetime import datetime
 import time
+from datetime import datetime
 from pathlib import Path
+
+import yaml
 
 import ci_assets
 import ci_build
 import ci_test
+import run_pipeline
+from auto_escalation import main as run_escalation
 from ci_publish import _load_env
 from ci_publish import main as publish_main
-import yaml
 from notify import notify_all
 from pipeline_optimizer import suggest_optimizations
-import run_pipeline
-from tools.gen_changelog import main as gen_changelog
-from tools.gen_summary import generate_summary
-from tools.gen_multifeature_summary import generate_multifeature_summary
 from tools.gen_agent_stats import generate_agent_stats
+from tools.gen_changelog import main as gen_changelog
 from tools.gen_ci_overview import generate_ci_overview
+from tools.gen_multifeature_summary import generate_multifeature_summary
+from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
 from utils.pipeline_config import load_config
 
@@ -63,6 +65,7 @@ def _update_feature(name: str, info: dict) -> None:
     feature = data.setdefault("features", {}).setdefault(name, {})
     feature.update(info)
     _save_pipeline(data)
+
 
 ALL_AGENTS = [
     "GameDesignerAgent",
@@ -108,6 +111,9 @@ def run_once(optimize: bool = False) -> tuple[Path, dict]:
     ci_test.main()
     if cfg["steps"].get("build", True):
         ci_build.main()
+
+    # Auto-escalation after tests and auto-fix phase
+    run_escalation(out_dir=str(reports))
 
     publish_status = "success"
     if cfg["steps"].get("publish", True):

@@ -61,6 +61,12 @@ python ci_assets.py  # генерирует ассеты из asset_requests.jso
 `timestamp | AUTO_FIX | agent | status | description`.
 Пример: `2025-07-07 14:32:01 | AUTO_FIX | Coder | success | fixed missing method`.
 
+### Auto Escalation
+Если один агент выдаёт более трёх ошибок подряд по одной фиче,
+модуль `auto_escalation.py` фиксирует это в `agent_journal.log`,
+вызывает `TeamLeadAgent` для анализа и генерирует отчёт
+`ci_reports/autofailure_report.md`.
+
 ### Agent Learning
 Агенты ведут блок `learning_log` в `agent_memory.json`.\
 Каждая итерация сохраняет вход, выход и статус (`success` или `error`).\
