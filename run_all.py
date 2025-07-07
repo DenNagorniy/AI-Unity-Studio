@@ -10,6 +10,7 @@ from pathlib import Path
 import ci_build
 import ci_test
 from ci_publish import _load_env, main as publish_main
+from tools.gen_summary import generate_summary
 from run_pipeline import main as pipeline_main
 from tools.gen_changelog import main as gen_changelog
 from utils.agent_journal import read_entries
@@ -30,9 +31,11 @@ def main() -> None:
     ci_test.main()
     ci_build.main()
 
+    publish_status = "success"
     try:
         publish_main()
     except Exception as e:  # noqa: PERF203
+        publish_status = "error"
         print(f"Publish failed: {e}")
 
     gen_changelog()
@@ -44,6 +47,7 @@ def main() -> None:
         "## Agent log",
         *[f"- {entry}" for entry in lines[-20:]],
     ]
+    agent_results = {}
     try:
         test_data = json.loads(
             (reports / "ci_test.json").read_text(encoding="utf-8")
@@ -51,15 +55,22 @@ def main() -> None:
         build_data = json.loads(
             (reports / "ci_build.json").read_text(encoding="utf-8")
         )
+        test_status = "error" if "error" in test_data else "success"
+        build_status = (
+            "success" if build_data.get("status") == "success" else "error"
+        )
+        agent_results["TesterAgent"] = test_status
+        agent_results["BuildAgent"] = build_status
         summary_lines += [
             "",
             "## CI Results",
-            f"- Tests: {'error' if 'error' in test_data else 'ok'}",
-            f"- Build: {build_data.get('status', 'unknown')}",
+            f"- Tests: {test_status}",
+            f"- Build: {build_status}",
         ]
     except Exception:
         pass
 
+    urls = []
     try:
         cfg = _load_env()
         artifacts = [
@@ -79,6 +90,10 @@ def main() -> None:
     Path("final_summary.md").write_text(summary + "\n", encoding="utf-8")
     shutil.copy("final_summary.md", reports / "final_summary.md")
     print(summary)
+
+    agent_results["Publish"] = publish_status
+    summary_path = generate_summary(urls, agent_results, out_dir=str(reports))
+    print(f"Summary HTML: {summary_path}")
 
 
 if __name__ == "__main__":
