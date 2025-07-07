@@ -13,6 +13,7 @@
 | RefactorAgent       | Roslyn анализ, форматирование               |
 | BuildAgent          | Сборка WebGL / Android                      |
 | TeamLeadAgent       | Оркестрация, журналирование, метрики        |
+| AssetCrafter (v1.1) | Генерация ассетов, QC и каталог             |
 
 ### Status
 
@@ -26,6 +27,7 @@
 * ReviewAgent — ready, создаёт review_report.md
 * BuildAgent — ready
 * TeamLeadAgent — ready
+* AssetCrafter — ready (v1.1)
 
 ## 🎨 Creative Agents
 
