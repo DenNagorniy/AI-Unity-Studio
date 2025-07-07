@@ -2,10 +2,9 @@ import json
 import sys
 from pathlib import Path
 
-from agents.tech.coder import coder
+from agents.tech import architect_agent, build_agent, coder, game_designer, refactor_agent, review_agent, tester
 from agents.tech.project_manager import run as task_manager
 from agents.tech.tester import run as run_tests
-from agents.tech import architect_agent, build_agent, coder, game_designer, refactor_agent, review_agent, tester
 from dashboard import main as show_dashboard
 from utils.agent_journal import log_action
 from utils.apply_patch import apply_patch
@@ -36,7 +35,7 @@ def main():
     log_action("TeamLead", "pipeline start")
 
     # 2. Генерация патча
-    patch = coder(task_spec)
+    patch = coder.run(task_spec)
     print("🛠️ Patch:")
     print(json.dumps(patch, indent=2, ensure_ascii=False))
     # 1. Идея фичи

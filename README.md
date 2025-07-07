@@ -28,10 +28,12 @@ SceneBuilderAgent / CoderAgent → TesterAgent → BuildAgent → TeamLeadAgent 
 ```bash
 pip install -r requirements.txt
 cp .env.example .env  # Указать свои пути в .env
-python -m agents.tech.orchestrator "Hello world feature"
+python run_all.py  # полный цикл: пайплайн + тесты + билд
 ```
 
 Пайплайн: GameDesigner → ProjectManager → Architect → SceneBuilder → Coder → Tester → Build → TeamLead.
+
+Для запуска всего процесса и сохранения CI отчётов используйте `run_all.py`.
 
 ## Лицензия
 

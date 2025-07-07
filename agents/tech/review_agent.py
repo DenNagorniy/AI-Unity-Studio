@@ -14,13 +14,17 @@ def run(_: dict | None = None) -> dict:
 
     flake = subprocess.run(["flake8"], capture_output=True, text=True)
     dotnet_fmt = subprocess.run(["dotnet", "format", config.PROJECT_PATH], capture_output=True, text=True)
-    roslyn = subprocess.run([
-        "dotnet",
-        "build",
-        config.PROJECT_PATH,
-        "/warnaserror",
-        "/property:RunAnalyzers=true",
-    ], capture_output=True, text=True)
+    roslyn = subprocess.run(
+        [
+            "dotnet",
+            "build",
+            config.PROJECT_PATH,
+            "/warnaserror",
+            "/property:RunAnalyzers=true",
+        ],
+        capture_output=True,
+        text=True,
+    )
 
     report = {
         "flake8": flake.stdout + flake.stderr,
@@ -28,6 +32,21 @@ def run(_: dict | None = None) -> dict:
         "roslyn": roslyn.stdout + roslyn.stderr,
     }
     Path("review_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    md_lines = [
+        "# Review Report",
+        "",
+        "## flake8",
+        "```",
+        report["flake8"].strip(),
+        "```",
+        "",
+        "## Roslyn",
+        "```",
+        report["roslyn"].strip(),
+        "```",
+    ]
+    Path("review_report.md").write_text("\n".join(md_lines), encoding="utf-8")
 
     if flake.returncode or dotnet_fmt.returncode or roslyn.returncode:
         log_action("ReviewAgent", "issues found")

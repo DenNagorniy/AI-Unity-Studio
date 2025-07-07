@@ -13,7 +13,18 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
             return
-        data = {"index": load_index(), "journal": read_entries()}
+        review_data = {}
+        try:
+            with open("review_report.json", "r", encoding="utf-8") as f:
+                review_data = json.load(f)
+        except FileNotFoundError:
+            pass
+
+        data = {
+            "index": load_index(),
+            "journal": read_entries(),
+            "review": review_data,
+        }
         body = json.dumps(data).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
