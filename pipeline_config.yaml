@@ -9,6 +9,7 @@ agents:
   - SceneBuilderAgent
   - CoderAgent
   - TesterAgent
+  - FeatureInspectorAgent
   - BuildAgent
   - RefactorAgent
   - ReviewAgent
