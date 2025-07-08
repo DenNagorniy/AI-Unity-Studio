@@ -48,22 +48,41 @@ def save_backup(feature_name: str, source_path: str) -> None:
     else:
         raise FileNotFoundError(f"Source path not found: {src}")
 
+
 def restore_backup(feature_name: str, target_path: str) -> None:
     """Restore backup ``feature_name`` to ``target_path``."""
     src = Path.cwd() / BACKUP_ROOT / feature_name
     dest = Path(target_path)
 
     if not src.exists():
-        raise FileNotFoundError(f'Backup for {feature_name} not found')
+        raise FileNotFoundError(f"Backup for {feature_name} not found")
 
     if dest.exists():
         if dest.is_file():
             dest.unlink()
         else:
-            shutil.rmtree(dest)
+            for root, dirs, files in os.walk(dest, topdown=False):
+                for f in files:
+                    try:
+                        (Path(root) / f).unlink()
+                    except FileNotFoundError:
+                        pass
+                for d in dirs:
+                    path = Path(root) / d
+                    if path.name == ".git":
+                        continue
+                    shutil.rmtree(path, ignore_errors=True)
+    else:
+        dest.mkdir(parents=True, exist_ok=True)
 
     if src.is_dir():
-        shutil.copytree(src, dest)
+        for item in src.iterdir():
+            target = dest / item.name
+            if item.is_dir():
+                shutil.copytree(item, target, dirs_exist_ok=True)
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(item, target)
     else:
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dest)
