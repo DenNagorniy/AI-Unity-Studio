@@ -82,7 +82,7 @@ ABTrackerAgent отслеживает варианты фич с ключом `v
 
 ### CI Revert
 После успешного CI-прогона рабочая копия сохраняется в
-`.ci_backups/<feature>/`. Если автоисправление не помогло и TeamLeadAgent
+`_backups/<feature>/`. Если автоисправление не помогло и TeamLeadAgent
 выдал патч `teamlead_patch.json`, скрипт `ci_revert.py` восстанавливает
 бэкап и применяет патч как Emergency Patch.
 
