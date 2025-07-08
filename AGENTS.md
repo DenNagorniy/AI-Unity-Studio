@@ -63,7 +63,7 @@
 
 ## Current Milestone
 
-v1.0 released
+v2.0 released
 
 ## Tasks
 - [ ] Улучшить логи пайплайна и детализировать ошибки
