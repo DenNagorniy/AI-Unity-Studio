@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Run static analysis and code formatting for the project."""
+
 import subprocess
 from pathlib import Path
 
@@ -7,7 +9,7 @@ import config
 from utils.agent_journal import log_action, log_trace
 
 
-def run(input: dict) -> dict:
+def run(data: dict) -> dict:
     """Run Roslyn analyzers and dotnet format, saving report to refactor_report.txt."""
 
     log_action("RefactorAgent", "start")
@@ -38,5 +40,5 @@ def run(input: dict) -> dict:
         "dead_code": dead_code,
         "report": str(report_path),
     }
-    log_trace("RefactorAgent", "run", input, result)
+    log_trace("RefactorAgent", "run", data, result)
     return result

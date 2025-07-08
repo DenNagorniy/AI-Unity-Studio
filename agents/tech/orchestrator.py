@@ -1,3 +1,5 @@
+"""Entry point for coordinating all technical agents."""
+
 import json
 import sys
 

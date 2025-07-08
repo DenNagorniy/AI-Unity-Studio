@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+"""Utilities for generating C# code using a local LLM."""
+
 from pathlib import Path
 
+import agent_memory
+from utils.agent_journal import log_trace
 from utils.llm import ask_mistral
 from utils.test_generation import generate_test_files
-from utils.agent_journal import log_trace
-import agent_memory
 
 
 def coder(task_spec):

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Build the Unity project for a given target."""
+
 import shutil
 import subprocess
 from pathlib import Path
@@ -8,9 +10,9 @@ import config
 from utils.agent_journal import log_action, log_trace
 
 
-def run(input: dict) -> dict:
+def run(data: dict) -> dict:
     """Build the project for a given target using Unity CLI."""
-    target = input.get("target", "WebGL")
+    target = data.get("target", "WebGL")
     out_dir = Path("Build") / target
     log_action("BuildAgent", f"start {target}")
     cmd = [
@@ -36,5 +38,5 @@ def run(input: dict) -> dict:
     log_action("BuildAgent", status)
 
     result = {"target": target, "artifact": artifact, "status": status}
-    log_trace("BuildAgent", "run", input, result)
+    log_trace("BuildAgent", "run", data, result)
     return result
