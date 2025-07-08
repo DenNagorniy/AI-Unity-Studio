@@ -23,6 +23,7 @@ def save_backup(feature_name: str, source_path: str) -> None:
             src,
             dest,
             ignore=shutil.ignore_patterns(
+                BACKUP_ROOT.name,
                 ".backup",
                 ".git",
                 "venv",
