@@ -236,7 +236,7 @@ def _run_feature(name: str, prompt: str | dict, optimize: bool) -> dict:
         status = "error"
         results = {}
         summary = feature_dir / "summary.html"
-        restore_backup(name, ".")
+        restore_backup(name, scripts_path)
     finally:
         run_pipeline.ask_multiline = orig_ask
 
