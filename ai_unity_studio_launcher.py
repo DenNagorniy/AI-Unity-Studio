@@ -11,7 +11,7 @@ DASHBOARD = SCRIPT_DIR / "dashboard.py"
 
 def main() -> None:
     proc = subprocess.Popen([sys.executable, str(DASHBOARD), "--serve"], cwd=SCRIPT_DIR)
-    webbrowser.open("http://localhost:8080/overview")
+    webbrowser.open("http://localhost:8000/overview")
     proc.wait()
 
 

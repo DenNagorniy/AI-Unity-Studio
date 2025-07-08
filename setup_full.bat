@@ -20,15 +20,7 @@ python "%SCRIPT_DIR%env_setup.py"
 
 call "%SCRIPT_DIR%install_blender.bat"
 call "%SCRIPT_DIR%install_invokeai.bat"
-
-rem read OPENAI_API_KEY from .env
-set OPENAI_KEY=
-for /F "usebackq tokens=1,* delims==" %%A in ("%SCRIPT_DIR%.env") do (
-    if "%%A"=="OPENAI_API_KEY" set OPENAI_KEY=%%B
-)
-if "%OPENAI_KEY%"=="" (
-    call "%SCRIPT_DIR%install_local_llm.bat"
-)
+call "%SCRIPT_DIR%install_local_llm.bat"
 
 python "%SCRIPT_DIR%ai_unity_studio_launcher.py"
 endlocal
