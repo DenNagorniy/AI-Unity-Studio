@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import shutil
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -369,10 +370,13 @@ def main(optimize: bool = False, multi: str | None = None) -> None:
         return
 
     data = yaml.safe_load(Path(multi).read_text(encoding="utf-8")) or {}
-    features = data.get("features", {})
+    if not isinstance(data, dict) or "features" not in data:
+        print("Invalid YAML format: expected 'features' mapping")
+        sys.exit(1)
+    features = data.get("features")
     if not isinstance(features, dict):
         print("Invalid YAML format: expected 'features' mapping")
-        return
+        sys.exit(1)
 
     names = list(features.keys())
     _init_features(names, True)

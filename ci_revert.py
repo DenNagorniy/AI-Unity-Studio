@@ -8,7 +8,7 @@ from utils.apply_patch import apply_patch
 from utils.backup_manager import restore_backup, save_backup
 
 
-BACKUP_DIR = Path('.ci_backups')
+BACKUP_DIR = Path('_backups')
 
 
 def save_success_state(feature_name: str, source: str = '.') -> None:
