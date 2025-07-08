@@ -2,7 +2,6 @@ from __future__ import annotations
 
 """Generate simple scene files corresponding to generated scripts."""
 
-import json
 from pathlib import Path
 
 import agent_memory
@@ -14,21 +13,33 @@ def run(data: dict) -> dict:
 
     if not data:
         data = agent_memory.read("architecture") or {}
+
     script_path = data.get("path", "Generated/Helper.cs")
+    attach = data.get("attach_to_scene", False)
+
     scene_dir = Path("Assets/Scenes/Generated")
     scene_dir.mkdir(parents=True, exist_ok=True)
 
-    scene_name = Path(script_path).stem
-    json_path = scene_dir / f"{scene_name}.json"
-    scene_data = {
-        "scene": scene_name,
-        "monobehaviours": [script_path],
-    }
-    json_path.write_text(json.dumps(scene_data, indent=2), encoding="utf-8")
-    result = {
-        "scene": str(json_path),
-        "objects": scene_data["monobehaviours"],
-    }
+    comp_name = Path(script_path).stem
+    scene_name = f"{comp_name}_Test"
+    scene_path = scene_dir / f"{scene_name}.unity"
+
+    if attach:
+        scene_content = (
+            "%YAML 1.0\n"
+            "%TAG !u! tag:unity3d.com,2011:\n"
+            "--- !u!1 &1\n"
+            "GameObject:\n"
+            f"  m_Name: Feature_{comp_name}\n"
+            "  m_Component:\n"
+            f"  - component: {comp_name}\n"
+        )
+        scene_path.write_text(scene_content, encoding="utf-8")
+    else:
+        # create empty scene placeholder
+        scene_path.write_text("%YAML 1.0\n%TAG !u! tag:unity3d.com,2011:\n", encoding="utf-8")
+
+    result = {"scene_path": str(scene_path)}
     log_trace("SceneBuilderAgent", "run", data, result)
     agent_memory.write("scene", result)
     return result
