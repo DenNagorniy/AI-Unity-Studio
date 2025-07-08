@@ -29,6 +29,7 @@ from meta_agent import MetaAgent
 from notify import notify_all
 from pipeline_optimizer import suggest_optimizations
 from tools.gen_agent_stats import generate_agent_stats
+from tools.gen_agent_scores import generate_agent_scores
 from tools.gen_changelog import main as gen_changelog
 from tools.gen_ci_overview import generate_ci_overview
 from tools.gen_multifeature_summary import generate_multifeature_summary
@@ -172,6 +173,7 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
 
     gen_changelog()
     generate_agent_stats(out_dir=str(reports))
+    scores_path = generate_agent_scores(out_dir=str(reports))
 
     lines = read_entries()
     summary_lines = [
@@ -265,6 +267,7 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
         meta_insights=meta_text,
         self_improvement=self_text,
         self_monitor=monitor_path,
+        agent_scores=scores_path.as_posix(),
         out_dir=str(reports),
     )
     print(f"Summary HTML: {summary_path}")

@@ -91,6 +91,16 @@ def _load_learning_stats() -> dict:
     return stats
 
 
+def _load_agent_scores() -> dict:
+    path = Path("agent_scores.json")
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: D401
         if self.path == "/data":
@@ -101,6 +111,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(_load_trace_stats())
         elif self.path == "/agent-stats":
             self._send_html_file(Path("ci_reports") / "agent_stats.html")
+        elif self.path == "/agent-scores":
+            self._send_json(_load_agent_scores())
         elif self.path == "/overview":
             self._send_html_file(Path("ci_reports") / "ci_overview.html")
         else:
