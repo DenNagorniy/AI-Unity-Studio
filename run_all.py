@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
@@ -27,10 +27,9 @@ from ci_revert import apply_emergency_patch, save_success_state
 from meta_agent import MetaAgent
 from notify import notify_all
 from pipeline_optimizer import suggest_optimizations
-from tools.gen_agent_stats import generate_agent_stats
 from tools.gen_agent_scores import generate_agent_scores
+from tools.gen_agent_stats import generate_agent_stats
 from tools.gen_changelog import main as gen_changelog
-from tools.gen_ci_overview import generate_ci_overview
 from tools.gen_multifeature_summary import generate_multifeature_summary
 from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
@@ -95,6 +94,7 @@ def _apply_skip(base: list[str], flags: list[str]) -> list[str]:
 
 def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path, dict]:
     from utils.pipeline_config import load_config
+
     cfg = load_config()
     agents = cfg.get("agents") or ALL_AGENTS
     if optimize:
@@ -123,13 +123,15 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     for p in Path("narrative_events").glob("*.json") if Path("narrative_events").exists() else []:
         dialogues += p.read_text(encoding="utf-8") + "\n"
 
-    lore_result = lore_validator.run({
-        "feature": feature_name,
-        "description": desc,
-        "assets": catalog.get("assets", []),
-        "dialogues": dialogues,
-        "out_dir": str(reports),
-    })
+    lore_result = lore_validator.run(
+        {
+            "feature": feature_name,
+            "description": desc,
+            "assets": catalog.get("assets", []),
+            "dialogues": dialogues,
+            "out_dir": str(reports),
+        }
+    )
 
     if cfg["steps"].get("build", True):
         ci_build.main()
@@ -142,12 +144,10 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     ab_tracker.run({"out_dir": str(reports)})
     feedback_result = user_feedback.run({"out_dir": str(reports)})
 
-    publish_status = "success"
     if cfg["steps"].get("publish", True):
         try:
             publish_main()
         except Exception as e:
-            publish_status = "error"
             print(f"Publish failed: {e}")
 
     if cfg["steps"].get("qc", True):
@@ -160,16 +160,12 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
     generate_agent_stats(out_dir=str(reports))
     scores_path = generate_agent_scores(out_dir=str(reports))
 
-    summary_lines = [
-        "# Final Summary", "",
-        "## Agent log",
-        *[f"- {entry}" for entry in read_entries()[-20:]]
-    ]
+    summary_lines = ["# Final Summary", "", "## Agent log", *[f"- {entry}" for entry in read_entries()[-20:]]]
     agent_results = {
         "FeatureInspectorAgent": "success" if insp_result.get("verdict") == "Pass" else "error",
         "LoreValidatorAgent": "success" if lore_result.get("status") == "LorePass" else "error",
         "AIReviewPanel": review_result.get("verdict", "accept"),
-        "UserFeedbackAgent": feedback_result.get("status", "success")
+        "UserFeedbackAgent": feedback_result.get("status", "success"),
     }
 
     try:
@@ -204,9 +200,14 @@ def run_once(optimize: bool = False, feature_name: str = "single") -> tuple[Path
         feedback_text = meta_text = self_text = monitor_path = ""
 
     summary_path = generate_summary(
-        urls, agent_results, feedback_text, meta_insights=meta_text,
-        self_improvement=self_text, self_monitor=monitor_path,
-        agent_scores=scores_path.as_posix(), out_dir=str(reports)
+        urls,
+        agent_results,
+        feedback_text,
+        meta_insights=meta_text,
+        self_improvement=self_text,
+        self_monitor=monitor_path,
+        agent_scores=scores_path.as_posix(),
+        out_dir=str(reports),
     )
 
     notify_all(str(summary_path), "CHANGELOG.md", urls)
@@ -241,13 +242,16 @@ def _run_feature(name: str, prompt: str | dict, optimize: bool) -> dict:
 
     duration = round(time.time() - start, 2)
     rel_summary = summary.relative_to(base_reports)
-    _update_feature(name, {
-        "status": "passed" if status == "success" else "failed",
-        "ended": time.time(),
-        "duration": duration,
-        "summary_path": rel_summary.as_posix(),
-        "agent_results": results,
-    })
+    _update_feature(
+        name,
+        {
+            "status": "passed" if status == "success" else "failed",
+            "ended": time.time(),
+            "duration": duration,
+            "summary_path": rel_summary.as_posix(),
+            "agent_results": results,
+        },
+    )
 
     if status == "success":
         save_success_state(name, ".")
@@ -271,13 +275,16 @@ def main(optimize: bool = False, multi: str | None = None) -> None:
             end_t = time.time()
             dur = round(end_t - start, 2)
             rel = summary.relative_to(Path("ci_reports"))
-            _update_feature(name, {
-                "status": status,
-                "ended": end_t,
-                "duration": dur,
-                "summary_path": rel.as_posix(),
-                "agent_results": results,
-            })
+            _update_feature(
+                name,
+                {
+                    "status": status,
+                    "ended": end_t,
+                    "duration": dur,
+                    "summary_path": rel.as_posix(),
+                    "agent_results": results,
+                },
+            )
             if status == "passed":
                 save_success_state(name, ".")
         return
@@ -290,11 +297,11 @@ def main(optimize: bool = False, multi: str | None = None) -> None:
     _init_features(list(features.keys()), True)
 
     results = []
-    start_all = datetime.utcnow()
+    start_all = datetime.now(timezone.utc)
     for fname, prompt in features.items():
         print(f"\n=== {fname} ===")
         results.append(_run_feature(fname, prompt, optimize))
-    total_time = round((datetime.utcnow() - start_all).total_seconds(), 2)
+    total_time = round((datetime.now(timezone.utc) - start_all).total_seconds(), 2)
     summary = generate_multifeature_summary("ci_reports", results, total_time)
     print(f"Multi summary: {summary}")
 

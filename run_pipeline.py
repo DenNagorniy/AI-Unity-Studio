@@ -69,7 +69,8 @@ def main(agents: list[str] | None = None, use_memory: bool = False):
             if hint:
                 print(f"💡 Hint for GameDesignerAgent: {hint}")
         try:
-            feature = game_designer.run({"text": user_prompt})
+            gd_text = user_prompt if isinstance(user_prompt, str) else json.dumps(user_prompt, ensure_ascii=False)
+            feature = game_designer.run({"text": gd_text})
             log_action("GameDesignerAgent", feature.get("feature", ""))
             agent_learning.record_interaction("GameDesignerAgent", user_prompt, feature, "success")
         except Exception as e:  # noqa: PERF203
