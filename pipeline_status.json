@@ -1,1 +1,1 @@
-{"features": {}, "multi": false}
+{"features": {"test_feature_1": {"status": "running", "started": 1751988768.4171891, "ended": null, "duration": null, "summary_path": "", "agent_results": {}, "is_multi": true}, "test_feature_2": {"status": "queued", "started": null, "ended": null, "duration": null, "summary_path": "", "agent_results": {}, "is_multi": true}, "test_feature_3": {"status": "queued", "started": null, "ended": null, "duration": null, "summary_path": "", "agent_results": {}, "is_multi": true}}, "multi": true}
