@@ -238,7 +238,12 @@ def _run_feature(name: str, prompt: str | dict, optimize: bool) -> dict:
         status = "error"
         results = {}
         summary = feature_dir / "summary.html"
-        restore_backup(name, str(scripts_path))
+        if "Unity CLI returned 1" in str(e):
+            print(
+                "⚠️ Skipping restore: Unity test failed, keeping generated files for inspection."
+            )
+        else:
+            restore_backup(name, str(scripts_path))
     finally:
         run_pipeline.ask_multiline = orig_ask
 
