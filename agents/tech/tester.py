@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Utilities to build and run Unity tests via the CLI."""
+
 import json
 import subprocess
 import xml.etree.ElementTree as ET

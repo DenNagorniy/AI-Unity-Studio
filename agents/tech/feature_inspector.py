@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Analyze assets and features to maintain an index."""
+
 import json
 from pathlib import Path
 from typing import Any, Dict, List

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Run flake8, dotnet format, and Roslyn checks for code quality."""
+
 import json
 import subprocess
 from pathlib import Path

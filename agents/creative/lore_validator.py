@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Validate generated content against the existing lore."""
+
 import json
 import re
 from pathlib import Path

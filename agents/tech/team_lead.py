@@ -1,6 +1,8 @@
 # agents/tech/team_lead.py
 from __future__ import annotations
 
+"""Persist metrics and logs for each pipeline execution."""
+
 import json
 from datetime import datetime
 from pathlib import Path
