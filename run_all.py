@@ -34,6 +34,7 @@ from tools.gen_multifeature_summary import generate_multifeature_summary
 from tools.gen_summary import generate_summary
 from utils.agent_journal import read_entries
 from utils.backup_manager import restore_backup, save_backup
+from pipeline_config import get_config
 
 STATUS_PATH = Path("pipeline_status.json")
 
@@ -220,8 +221,9 @@ def _run_feature(name: str, prompt: str | dict, optimize: bool) -> dict:
     os.environ["CI_REPORTS_DIR"] = str(feature_dir)
     feature_dir.mkdir(parents=True, exist_ok=True)
 
-    scripts_path = os.getenv("UNITY_SCRIPTS_PATH", "Assets/Scripts")
-    save_backup(name, scripts_path)
+    cfg_env = get_config()
+    scripts_path = cfg_env["scripts_path"]
+    save_backup(name, str(scripts_path))
 
     orig_ask = run_pipeline.ask_multiline
     run_pipeline.ask_multiline = lambda: prompt if isinstance(prompt, dict) else {"feature": prompt}
@@ -236,7 +238,7 @@ def _run_feature(name: str, prompt: str | dict, optimize: bool) -> dict:
         status = "error"
         results = {}
         summary = feature_dir / "summary.html"
-        restore_backup(name, scripts_path)
+        restore_backup(name, str(scripts_path))
     finally:
         run_pipeline.ask_multiline = orig_ask
 
