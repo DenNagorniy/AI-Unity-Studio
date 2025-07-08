@@ -22,3 +22,7 @@ Build/
 ci_reports/
 build-outputs-*.zip
 final_summary.md
+/external/
+/__pycache__/
+/.ci_backups/
+/*.log

@@ -1,17 +1,27 @@
 @echo off
 setlocal
-set OLLAMA_DIR=%~dp0tools\ollama
-set OLLAMA_EXE=%OLLAMA_DIR%\ollama.exe
+set MISTRAL_PATH=%~dp0external\ollama\mistral.q4_K_M.gguf
+set SDXL_PATH=%~dp0external\models\sdxl\sd_xl_base_1.0.safetensors
 
-if exist "%OLLAMA_EXE%" (
-    echo Ollama already installed.
+if exist "%MISTRAL_PATH%" (
+    echo Mistral model already present.
 ) else (
-    if not exist "%OLLAMA_DIR%" mkdir "%OLLAMA_DIR%"
-    echo Downloading Ollama...
-    curl -L -o "%OLLAMA_DIR%\ollama.zip" https://ollama.com/download/OllamaWindows.zip
-    powershell -ExecutionPolicy Bypass -Command "Expand-Archive -Path '%OLLAMA_DIR%\ollama.zip' -DestinationPath '%OLLAMA_DIR%' -Force"
-    del "%OLLAMA_DIR%\ollama.zip"
+    if not exist "%~dp0external\ollama" mkdir "%~dp0external\ollama"
+    echo Downloading Mistral model...
+    curl -L -o "%MISTRAL_PATH%" https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/mistral-7b-instruct-v0.2.Q4_K_M.gguf
+    if %ERRORLEVEL% NEQ 0 (
+        echo Failed to download Mistral model. Skipping.
+    )
 )
 
-"%OLLAMA_EXE%" pull llama3
+if exist "%SDXL_PATH%" (
+    echo SDXL model already present.
+) else (
+    if not exist "%~dp0external\models\sdxl" mkdir "%~dp0external\models\sdxl"
+    echo Downloading SDXL model...
+    curl -L -o "%SDXL_PATH%" https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
+    if %ERRORLEVEL% NEQ 0 (
+        echo Failed to download SDXL model. Skipping.
+    )
+)
 endlocal
