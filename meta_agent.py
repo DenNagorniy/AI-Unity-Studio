@@ -103,7 +103,8 @@ class MetaAgent:
 
     def _build_context(self) -> Dict[str, Any]:
         log = self._load_memory()
-        journal = self._parse_journal()
+        # Journal parsing currently unused but kept for future enhancements
+        self._parse_journal()
         trace = self._parse_trace()
         feedback = self._parse_feedback()
 

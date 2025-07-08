@@ -48,6 +48,7 @@ def _collect_known_features() -> List[str]:
             mem = json.loads(_MEMORY_PATH.read_text(encoding="utf-8"))
         except Exception:
             mem = {}
+
         def _walk(value):
             if isinstance(value, dict):
                 if isinstance(value.get("feature"), str):
