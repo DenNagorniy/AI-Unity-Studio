@@ -16,8 +16,8 @@ def test_ab_tracker_report(tmp_path, monkeypatch):
     Path("project_map.json").write_text(json.dumps(pm), encoding="utf-8")
 
     events = {
-        "A": {"feature_used": 5, "step_completed": 4, "error_occured": 1},
-        "B": {"feature_used": 6, "step_completed": 5, "error_occured": 0},
+        "A": {"feature_used": 5, "step_completed": 4, "error_occurred": 1},
+        "B": {"feature_used": 6, "step_completed": 5, "error_occurred": 0},
     }
     monkeypatch.setattr(ab_tracker, "_collect_events", lambda f, v: events)
 

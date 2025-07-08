@@ -25,7 +25,7 @@ def _collect_events(feature: str, variants: list[str]) -> Dict[str, Dict[str, in
         events[v] = {
             "feature_used": random.randint(50, 100),
             "step_completed": random.randint(10, 50),
-            "error_occured": random.randint(0, 5),
+            "error_occurred": random.randint(0, 5),
         }
     return events
 
@@ -36,11 +36,11 @@ def _write_report(
     lines = ["# A/B Test Report", ""]
     for feat, variants in data.items():
         lines.append(f"## {feat}")
-        lines.append("| Variant | feature_used | step_completed | error_occured |")
+        lines.append("| Variant | feature_used | step_completed | error_occurred |")
         lines.append("|---------|--------------|----------------|---------------|")
         for variant, metrics in variants.items():
             lines.append(
-                f"| {variant} | {metrics['feature_used']} | {metrics['step_completed']} | {metrics['error_occured']} |"
+                f"| {variant} | {metrics['feature_used']} | {metrics['step_completed']} | {metrics['error_occurred']} |"
             )
         lines.append("")
         lines.append(f"**Winner:** {winners.get(feat, '-')}")
