@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from config import PROJECT_PATH, UNITY_SCRIPTS_PATH
+from pipeline_config import get_config
+
+CFG = get_config()
+PROJECT_PATH = CFG["project_path"]
+SCRIPTS_PATH = CFG["scripts_path"]
 
 
 def normalize_path(p: str | Path) -> Path:
@@ -21,7 +25,7 @@ def save_to_unity_structure(modification):
     elif rel.parts and rel.parts[0] in ("Scripts", "Tests"):
         rel = Path(*rel.parts[1:])
 
-    target_path = Path(PROJECT_PATH) / UNITY_SCRIPTS_PATH / rel
+    target_path = SCRIPTS_PATH / rel
     target_path.parent.mkdir(parents=True, exist_ok=True)
     target_path.write_text(content, encoding="utf-8")
     print(f"✅ Файл сохранён в Unity проект: {target_path}")
