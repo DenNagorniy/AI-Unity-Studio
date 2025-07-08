@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 import agent_learning
-from agents.tech import coder, refactor_agent, scene_builder_agent
+from agents.tech import coder, refactor_agent, scene_builder_agent, build_agent
 from config import UNITY_SCRIPTS_PATH
 from utils.agent_journal import log_auto_fix
 from utils.apply_patch import apply_patch
@@ -15,7 +15,7 @@ AGENT_MAP = {
     "TesterAgent": coder,
     "RefactorAgent": refactor_agent,
     "SceneBuilderAgent": scene_builder_agent,
-    "BuildAgent": refactor_agent,
+    "BuildAgent": build_agent,
 }
 
 

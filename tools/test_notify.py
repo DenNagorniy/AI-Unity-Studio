@@ -57,6 +57,6 @@ def test_notify_all(monkeypatch, tmp_path):
 
     notify.notify_all(str(summary), str(changelog), ["art.zip"])
 
-    assert any("art.zip" in v for v in events.values())
+    assert any("art.zip" in str(v) for v in events.values())
     assert any("api.telegram.org" in url for url in events)
     assert "https://slack" in events

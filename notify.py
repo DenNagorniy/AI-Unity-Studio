@@ -51,14 +51,15 @@ def _send_slack(text: str, artifacts: list[str] | None = None) -> None:
         return
     try:
         data = {"text": text}
-        extra: dict[str, str] = {}
+        attachments = []
         for art in artifacts or []:
-            extra[art] = ""
+            attachments.append({"text": art})
+        if attachments:
+            data["attachments"] = attachments
         requests.post(
             url,
             json=data,
             timeout=10,
-            **extra,
         )
     except Exception as e:  # noqa: PERF203
         print(f"Slack send error: {e}")
