@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Agent Scores</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    table { border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; }
+    .up { background-color: #c8e6c9; }
+    .down { background-color: #ffcdd2; }
+    .same { background-color: #fff9c4; }
+  </style>
+</head>
+<body>
+<h1>Agent Scores</h1>
+<table>
+<tr>
+  <th>Agent</th>
+  <th>Calls</th>
+  <th>Success</th>
+  <th>Fail</th>
+  <th>Autofix</th>
+  <th>Escalations</th>
+  <th>Self-Improve</th>
+  <th>Success %</th>
+  <th>Trend</th>
+</tr>
+{% for s in scores %}
+<tr class="{{ s.trend }}">
+  <td>{{ s.agent }}</td>
+  <td>{{ s.calls }}</td>
+  <td>{{ s.success }}</td>
+  <td>{{ s.fail }}</td>
+  <td>{{ s.autofix }}</td>
+  <td>{{ s.escalations }}</td>
+  <td>{{ s.self_improve }}</td>
+  <td>{{ '%.1f' % (s.success_rate * 100) if s.success_rate is not none else '' }}</td>
+  <td>{{ s.trend }}</td>
+</tr>
+{% endfor %}
+</table>
+<p>Generated: {{ generated }}</p>
+</body>
+</html>

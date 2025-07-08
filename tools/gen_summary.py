@@ -25,6 +25,7 @@ def _render(
     meta: str = "",
     self_improvement: str = "",
     self_monitor: str = "",
+    agent_scores: str = "",
 ) -> str:
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
     template = env.get_template(TEMPLATE_NAME)
@@ -37,6 +38,7 @@ def _render(
         meta=meta,
         self_improvement=self_improvement,
         self_monitor=self_monitor,
+        agent_scores=agent_scores,
     )
 
 
@@ -47,6 +49,7 @@ def generate_summary(
     meta_insights: str = "",
     self_improvement: str = "",
     self_monitor: str = "",
+    agent_scores: str = "",
     out_dir: str = "ci_reports",
 ) -> Path:
     """Create summary.html from given data."""
@@ -79,6 +82,7 @@ def generate_summary(
         meta_insights,
         self_improvement,
         self_monitor,
+        agent_scores,
     )
     out_directory = Path(out_dir)
     out_directory.mkdir(exist_ok=True)
@@ -94,6 +98,7 @@ def main() -> None:
     meta = os.getenv("SUMMARY_META", "")
     self_imp = os.getenv("SUMMARY_SELF", "")
     self_mon = os.getenv("SUMMARY_MONITOR", "")
+    scores = os.getenv("SUMMARY_AGENT_SCORES", "")
     path = generate_summary(
         urls,
         agents,
@@ -101,6 +106,7 @@ def main() -> None:
         meta_insights=meta,
         self_improvement=self_imp,
         self_monitor=self_mon,
+        agent_scores=scores,
     )
     print(path)
 

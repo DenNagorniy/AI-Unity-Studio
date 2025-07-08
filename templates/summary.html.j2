@@ -51,6 +51,13 @@
 <p>n/a</p>
 {% endif %}
 
+<h2>Analytics</h2>
+{% if agent_scores %}
+<ul>
+  <li><a href="{{ agent_scores }}">Agent Scores</a></li>
+</ul>
+{% endif %}
+
 <h2>Metadata</h2>
 <ul>
   <li>Date: {{ metadata.date }}</li>
