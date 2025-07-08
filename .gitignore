@@ -27,3 +27,14 @@ final_summary.md
 /.ci_backups/
 /_backups/
 /*.log
+
+# Unity project artifacts (excluded from AI Studio)
+Assets/
+*.cs
+*.meta
+*.prefab
+*.unity
+*.asmdef
+Tests/
+_backups/
+Builds/
