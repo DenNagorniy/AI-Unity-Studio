@@ -5,7 +5,16 @@ from pathlib import Path
 
 import agent_learning
 import agent_memory
-from agents.tech import architect_agent, build_agent, coder, game_designer, refactor_agent, review_agent, tester
+from agents.tech import (
+    architect_agent,
+    build_agent,
+    coder,
+    game_designer,
+    refactor_agent,
+    review_agent,
+    scene_builder_agent,
+    tester,
+)
 from agents.tech.project_manager import run as task_manager
 from agents.tech.tester import run as run_tests
 from auto_fix import auto_fix
@@ -94,6 +103,11 @@ def main(agents: list[str] | None = None, use_memory: bool = False):
             raise
     else:
         arch = feature
+
+    task_list = task_spec.get("tasks") or []
+    for task in task_list:
+        if task.get("attach_to_scene") is True:
+            scene_builder_agent.run({"path": arch.get("path"), **task})
 
     # 3. Код
     if not agents or "CoderAgent" in agents:
